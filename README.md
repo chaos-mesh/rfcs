@@ -37,7 +37,7 @@ npm run lint
 
 ## License
 
-This content is licensed under Apachie License, Version 2.0,
+This content is licensed under Apache License, Version 2.0,
 ([LICENSE](LICENSE) or http://www.apache.org/licenses/LICENSE-2.0)
 
 ## Contributions
