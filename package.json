@@ -1,0 +1,11 @@
+{
+  "name": "rfcs",
+  "version": "0.0.0",
+  "devDependencies": {},
+  "scripts": {
+    "lint": "markdownlint text/*.md"
+  },
+  "dependencies": {
+    "markdownlint-cli": "^0.24.0"
+  }
+}
