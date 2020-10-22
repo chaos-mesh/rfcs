@@ -1,2 +1,2 @@
-# enhancements
-Enhancements tracking repo for Chaos Mesh
+# rfcs
+RFCs for changes to Chaos Mesh and its ecosystem
