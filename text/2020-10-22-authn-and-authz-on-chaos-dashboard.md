@@ -23,28 +23,38 @@ We need permission management about:
 
 ## Detailed design
 
-We want chaos-dashboard working like kubernetes-dashboard: it ask user
-for a **Service Account token** to login.
+### Login
 
-Here is unfinished works we need to do:
+Users are asked for a `Service Account Token` to login. Like kubernetes dashboard:
+
+![kubernetes login](../media/kubernetes-dashboard-login.png)
+
+### Create new users
+
+System administrators could create user with certain username and permissions,
+then a user will be create, and token also shown on the UI.
+
+### Implementation references
+
+Things to do:
 
 - frontend asking user input token to login
 - frontend will attach the token while sending requests to backend
 - backend will use a certain token to create a new kube client
 - backend need support multi-user
 
-For users, administrators could create
+> We could references auth module in kubernetes-dashboard while implementing this.
 
-We will provide some pre-set **Role**, like:
+When chaos-dashboard creating user, new `ServiceAccount` will be created, then a
+new `RoleBinding` will connect certain `Role` to `ServiceAccount`.
+
+We will provide some pre-set `Role`, like:
 
 - Admin: could create/get any chaos experiments.
 - Viewer: could only get chaos experiments.
 
-System administrators could use role chaos-dashboard provided to create service
-accounts which hold different permissions. System administrators could also create
-roles, for more advanced permission control.
-
-> More implementation detail required.
+System administrators could also create their own roles, for advanced permission
+control.
 
 ## Drawbacks
 
