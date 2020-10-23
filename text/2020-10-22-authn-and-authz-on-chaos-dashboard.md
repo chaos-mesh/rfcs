@@ -56,6 +56,13 @@ We will provide some pre-set `Role`, like:
 System administrators could also create their own roles, for advanced permission
 control.
 
+### Advantages
+
+- This solution depends on kubernetes rbac, reducing many logics for permission management.
+- System administrators could change each user's permission as their requirements,
+  it's very flexible.
+- Using kubernetes rbac could also restrict permission with `kubectl`.
+
 ## Drawbacks
 
 - This solution need chaos-dashboard has permission about create/get/update/delete
@@ -64,10 +71,8 @@ control.
 
 ## Alternatives
 
-- Just using kubernetes rbac, reduce many logics for permission management.
-- System administrators could change each user's permission as their requirements,
-  it's very flexible.
-- Using kubernetes rbac could also restrict permission with `kubectl`.
+- Implement a full-featured rbac platform inner the chaos-dashboard.
+  It's so complex and high-cost, and it is NOT cloud-native at all.
 
 ## Unresolved questions
 
