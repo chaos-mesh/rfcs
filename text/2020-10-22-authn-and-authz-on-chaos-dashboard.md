@@ -31,8 +31,8 @@ Users are asked for a `Service Account Token` to login. Like kubernetes dashboar
 
 ### Create new users
 
-System administrators could create user with certain username and permissions,
-then a user will be create, and token also shown on the UI.
+Chaos dashboard do NOT provide any features about creating user. System administrators
+should manually create `ServiceAccount` with certain username, then bind to a `Role`.
 
 ### Implementation references
 
@@ -44,9 +44,6 @@ Things to do:
 - backend need support multi-user
 
 > We could references auth module in kubernetes-dashboard while implementing this.
-
-When chaos-dashboard creating user, new `ServiceAccount` will be created, then a
-new `RoleBinding` will connect certain `Role` to `ServiceAccount`.
 
 We will provide some pre-set `Role`, like:
 
@@ -65,8 +62,6 @@ control.
 
 ## Drawbacks
 
-- This solution need chaos-dashboard has permission about create/get/update/delete
-  on Role/RoleBinding/Service Account/Secrets.
 - Users should understand basic concepts about kubernetes rbac.
 
 ## Alternatives
