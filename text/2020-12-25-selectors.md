@@ -23,7 +23,7 @@
 
 ## Summary
 
-Here is an RFC about a more efficient and flexible selectors.
+Here is an RFC about more efficient and flexible selectors.
 
 ## Motivation
 
@@ -48,8 +48,8 @@ In conclusion, issues acquire these features:
 Current Selector implementation is just several methods. It's quite simple but
 not easy to extend.
 
-Before entering detailed design, let's take a look on current implementation of
-Selector:
+Before entering detailed design, let's take a look at the current implementation
+of Selector:
 
 Here is an interface called `SelectSpec`, which contains three methods:
 
@@ -61,7 +61,7 @@ type SelectSpec interface {
 }
 ```
 
-All Chaos CRD resource implements this interface, it means all chaos needs the
+All Chaos CRD resource implements this interface; it means all chaos needs the
 selector.
 
 And there are several methods that often used:
@@ -72,21 +72,21 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, error)
 ```
 
-Notice that "Mode/Value" also effect the final result of select, depends on
+Notice that "Mode/Value" also affect the final result of select, depends on
 "Mode", it will apply "OnePod", "AllPod", "FixedPod" etc.
 
-On bushiness logic, there are two part of `SelectSpec`: "SelectorSpec" and
+On bushiness logic, there are two-part of `SelectSpec`: "SelectorSpec" and
 "Mode/Value". Any resources are filtered/selected by "SelectorSpec" then be
 selected again by "Mode/Value", then we get the final target of chaos injecting.
 
-I think we should split these two part, into different interface.
+I think we should split these two-part into different interfaces.
 
 There are several usage for the selector:
 
 - Select certain pods with pod-name.
-- List pods with kubernetes native label/field selector from target
-  namespace(s), then filter with namespace, annotations and pod-phase.
-- Check a pod(resource) is match the selector.
+- List pods with Kubernetes native label/field selector from target
+  namespace(s), then filter with namespace, annotations, and pod-phase.
+- Check a pod(resource) is matches the selector.
 
 ## Detailed design
 
@@ -105,10 +105,10 @@ type SelectSpec interface {
 }
 ```
 
-It will return an empty struct with same type with resources which will be
-selected. For example, currently all implementation should return an empty
-struct `v1.Pod`, it means all chaos will be injected into **Pod**. **This method
-should be implemented by code generation.**
+It will return an empty struct with the same type of resources that will be
+selected. For example, currently, all implementation should return an empty
+struct `v1.Pod`, which means all chaos will be injected into **Pod**. **This
+method should be implemented by code generation.**
 
 > We already have requirement for injecting chaos into other resources, like
 > **Service** or some Fake/Mirrored Resource for multi-cluster.
@@ -119,9 +119,9 @@ should be changed to another name, like `ChooseMode` or something else.
 ### Selector
 
 We will define an interface called `Selector` that could "select" expected
-resource from kubernetes.
+resource from Kubernetes.
 
-> It still depends on kubernetes. :) We will not leave kubernetes in shorten
+> It still depends on Kubernetes. :) We will not leave Kubernetes in shorten
 > future.
 
 ```go
@@ -138,14 +138,14 @@ interface Filter{
 
 > As golang do not contain features like generic type, method
 > `Selector#Select()` just return `[]interface{}` directly. And a method
-> `CouldResolve()` will return an array of empty struct with the same type
+> `CouldResolve()` will return an array of the empty struct with the same type
 > represents the resources which this Selector/Filter will return.
 
 Why CouldResolve return an array of interface{} not a single interface{}?
 
-Based on kubernetes, it's easy to implement a shared selector that could resolve
-selecting on many type of resources. Because label/namespace and other thing is
-out of CRD.
+Based on Kubernetes, it's easy to implement a shared selector that could resolve
+selecting on any types of resources. Because label/namespace and other things
+are out of CRD.
 
 Let's talk about implementations:
 
@@ -153,13 +153,13 @@ Let's talk about implementations:
 
 ##### CertainResourceSelector
 
-It select resources from kubernetes by certain name, it contains a kubernetes
-client and trying to fetch resources by name one-by-one.
+It select resources from Kubernetes by certain names, and it contains a
+Kubernetes client and trying to fetch resources by name one-by-one.
 
 ##### ResourceFetcher
 
-It also contains kubernetes client, and select resources from kubernetes by
-kubernetes native list API with label/field selectors.
+It also contains Kubernetes client, and select resources from Kubernetes by
+Kubernetes native list API with label/field selectors.
 
 ### Filters
 
@@ -185,7 +185,7 @@ func NewSelectorChain(originFetcher Selector, filters ...Filter) Selector {
 
 ### SelectorBuilder/SelectorFactory
 
-> As a ex-java-developer, I prefer SelectorFactory.
+> As an ex-java-developer, I prefer SelectorFactory.
 
 It will parse the `SelectSpec` then build a `Selector`. I am not sure to let
 "SelectorBuilder/SelectorFactory" handle multi-resources thing or make it upper
@@ -201,25 +201,25 @@ interface Chooser {
 }
 ```
 
-I think `Chooser` is quite simple, and even don't concern about multi type of
-resource. It will handle logic so called "OnePodMode", "AllPodMode";
+I think `Chooser` is quite simple, and even don't concern about multi-type of
+the resource. It will handle logic so-called "OnePodMode", "AllPodMode";
 
-> Although chooser is very simple now, but I still want it independency, it is
+> Although chooser is very simple now, but I still want it independency; it is
 > useful to designing "watching" features with a stateful Chooser.
 
 ## Drawbacks
 
 It will not implement `CheckPodMeetSelector`, so we might select all resources
-then make a assert of "Contains".
+then make an assert of "Contains".
 
 ## Alternatives
 
-No alternative design so far, we need discussions.
+No alternative design so far; we need discussions.
 
 ## Unresolved questions
 
-A shared Filter, any filter could wrapper with a Selector backend, so we could
-just follow the Selector interface.
+A shared Filter, any filter could as wrappered with a Selector backend, so we
+could just follow the Selector interface.
 
 ```go
 type SelectorFunc func(origin []interface{}) (Selector, error)
