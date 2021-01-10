@@ -24,6 +24,7 @@
 - API server 后端存储可以使用 Etcd，直接复用。 不需要记录数据，只记录集群与节点组状态。 其实记录测试数据会好一点，但是开发工作量大一点。
 - 也可以 API server 直接生成 CRD，但可能不太有好。 或者 Extension API Server？可能与 K8s 强绑定了。
 
+![kubernetes login](../media/caas-architecture.png)
 
 #### 可观测性
 
