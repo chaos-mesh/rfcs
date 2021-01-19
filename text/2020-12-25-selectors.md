@@ -29,12 +29,14 @@ Here is an RFC about more efficient and flexible selectors.
 
 Here are already several issues about the selectors:
 
-- [#886](https://github.com/chaos-mesh/chaos-mesh/issues/886)
-- [#1102](https://github.com/chaos-mesh/chaos-mesh/issues/1102)
-- [#1222](https://github.com/chaos-mesh/chaos-mesh/issues/1222)
-- [#1227](https://github.com/chaos-mesh/chaos-mesh/issues/1227)
-- [#1266](https://github.com/chaos-mesh/chaos-mesh/issues/1266)
-- [#1322](https://github.com/chaos-mesh/chaos-mesh/issues/1322)
+- [#193](https://github.com/chaos-mesh/chaos-mesh/issues/193) extend with plugin
+- [#886](https://github.com/chaos-mesh/chaos-mesh/issues/886) refactor codes
+- [#1102](https://github.com/chaos-mesh/chaos-mesh/issues/1102) ask for "rich selector"
+- [#1222](https://github.com/chaos-mesh/chaos-mesh/issues/1222) watching changes
+- [#1227](https://github.com/chaos-mesh/chaos-mesh/issues/1227) select other resource, not only pod
+- [#1259](https://github.com/chaos-mesh/chaos-mesh/issues/1259) watching changes
+- [#1266](https://github.com/chaos-mesh/chaos-mesh/issues/1266) set-based selector
+- [#1322](https://github.com/chaos-mesh/chaos-mesh/issues/1322) select other resource, not only pod
 
 In conclusion, issues acquire these features:
 
