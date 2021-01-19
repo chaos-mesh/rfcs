@@ -12,6 +12,7 @@
         - [CertainResourceSelector](#certainresourceselector)
         - [ResourceFetcher](#resourcefetcher)
     - [Filters](#filters)
+      - [Composite Filter: AND/OR](#composite-filter-andor)
     - [SelectorChain](#selectorchain)
     - [SelectorBuilder/SelectorFactory](#selectorbuilderselectorfactory)
     - [Chooser](#chooser)
@@ -175,12 +176,31 @@ func (it *NamespaceFilter) Filter(origin []interface{}) ([]interface,error) {
 }
 ```
 
+#### Composite Filter: AND/OR
+
+For complex condition, we should composite filters so called `AndFilter` and
+`OrFilter`, for example:
+
+```go
+struct AndFilter {
+  filters []Filter
+}
+
+func (it *AndFilter) Filter(origin []interface{}) ([]interface{}, error) {
+}
+
+// constructor
+func AND(filters ...Filters) Filter {
+  
+}
+```
+
 ### SelectorChain
 
 It's a composite Selector which contains one or more other selectors and filter.
 
 ```go
-func NewSelectorChain(originFetcher Selector, filters ...Filter) Selector {
+func NewSelectorChain(originFetcher Selector, filter Filter) Selector {
 
 }
 ```
