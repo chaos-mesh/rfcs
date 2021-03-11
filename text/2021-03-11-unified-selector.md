@@ -27,8 +27,6 @@ CRD.
 
 ## Detailed Design
 
-### Unified Selector
-
 Every chaos specification would define a function to get the specification of
 selectors:
 
