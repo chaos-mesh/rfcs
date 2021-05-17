@@ -48,6 +48,44 @@ This ensures easy maintainance and easy-to-change for these components.
 Server support needs to be added to chaosd so it listens for authenticated
 requests on some port of the host machine.
 
+### Authentication & Authorization
+
+#### Chaosd
+
+Chaosd runs on physic nodes outside kubernetes cluster, so it is vulnerable to attack
+from internet. To prevent misuse of chaosd, it needs to allow only authenticated
+requests. The easiest and secure setup is to use SSL certificates to both encrypt
+the request data and for authentication.
+
+From the perspective of communication, the dashboard will represent the end user
+and so act as a client, whereas chaosd instance would represent the server.
+The client can be authenticated here by making use of
+[SSL Client Authentication](https://aboutssl.org/ssl-tls-client-authentication-how-does-it-works/)
+technique.
+
+In this setup, private key of the certificate will be generated and kept with the
+dashboard and public key would be stored on chaosd nodes. On any request,
+chaosd would first verify the digital signatures presented by the client to
+authenticate the request.
+
+#### Chaos Mesh
+
+Chaos Mesh is by default authenticated using kubernetes token provided.
+If needed, requests could be further protected using SSL certificates.
+
+#### Dashboard
+
+In dashboard, basic authentication protocol using username/password can be
+implemented and the data of users can be stored in DB. To implement RBAC
+(Role-based access control), **roles** can be defined to comprise of allowed
+permissions for that role. User and Role and related by many-to-many relationship,
+i.e. user can have many roles and a role can belong to many users.
+Only the user with admin privilege can add/edit users and roles.
+
+To allow access of a role to a particular chaos nodes (whether physic/kubernetes),
+admin can permit the role to have access to nodes with particular tag,
+which is set in the dashboard.
+
 ### Web Dashboard
 
 With this new powerful dashboard, chaos-mesh will be one step closer to
@@ -76,4 +114,3 @@ NA
 
 1. How to securely store auth credentials in the dashboard?
    (could refer GitHub Secrets)
-2. What authentication mechanism to use for chaosd on Physic node?
