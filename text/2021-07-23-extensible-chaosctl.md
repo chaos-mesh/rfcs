@@ -2,7 +2,7 @@
 
 ## Summary
 
-A tool to control the status of Chaos Mesh as much as possible in extensible way. 
+A tool to control the status of Chaos Mesh as much as possible in an extensible way. 
 
 ## Motivation
 
