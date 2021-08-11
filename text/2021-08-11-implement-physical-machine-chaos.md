@@ -101,11 +101,11 @@ metadata:
   namespace: chaos-testing
 spec:
   action: network-delay
-  address: 
+  address:
     - http://172.16.112.130:31767
   network-delay:
     device: “ens33”
-    hostname: “baidu.com” 
+    hostname: “baidu.com”
     duration: "5s"
 ```
 
@@ -119,7 +119,7 @@ metadata:
   namespace: chaos-testing
 spec:
   action: stress-cpu
-  address: 
+  address:
     - http://172.16.112.130:31767
   stress-cpu:
     workers: 3
