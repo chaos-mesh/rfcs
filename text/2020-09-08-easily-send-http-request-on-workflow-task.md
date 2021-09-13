@@ -1,61 +1,86 @@
 # Easily Send HTTP Request On Workflow Task
 
-- [Easily Send HTTP Request On Workflow Task](#easily-send-http-request-on-workflow-task)
+- [Easily Send HTTP Request On Workflow
+  Task](#easily-send-http-request-on-workflow-task)
   - [Summary](#summary)
   - [Motivation](#motivation)
   - [Detailed design](#detailed-design)
-    - [Rendering `Task` for sending HTTP request in pure frontend](#rendering-task-for-sending-http-request-in-pure-frontend)
+    - [Rendering `Task` for sending HTTP request in pure
+      frontend](#rendering-task-for-sending-http-request-in-pure-frontend)
       - [Why `curl`?](#why-curl)
       - [Frontend form parameters](#frontend-form-parameters)
-      - [Load request body from ConfigMap as file](#load-request-body-from-configmap-as-file)
+      - [Load request body from ConfigMap as
+        file](#load-request-body-from-configmap-as-file)
       - [Advanced configuration](#advanced-configuration)
-      - [Frontend component for this certain type of `Task` and preview of generated result](#frontend-component-for-this-certain-type-of-task-and-preview-of-generated-result)
+      - [Frontend component for this certain type of `Task` and preview of
+        generated
+        result](#frontend-component-for-this-certain-type-of-task-and-preview-of-generated-result)
     - [New context variable: `http`](#new-context-variable-http)
       - [Structure of `http`](#structure-of-http)
       - [Example conditions:](#example-conditions)
   - [Drawbacks](#drawbacks)
-    - [parsing curl command inline back into the parameters](#parsing-curl-command-inline-back-into-the-parameters)
-    - [parser of context variable `http`, and `stdout`](#parser-of-context-variable-http-and-stdout)
+    - [parsing curl command inline back into the
+      parameters](#parsing-curl-command-inline-back-into-the-parameters)
+    - [parser of context variable `http`, and
+      `stdout`](#parser-of-context-variable-http-and-stdout)
   - [Alternatives](#alternatives)
-    - [Alternative solution 1: New type of WorkflowNode for sending HTTP request](#alternative-solution-1-new-type-of-workflownode-for-sending-http-request)
-    - [Alternative solution 2: put the rendering logic at the backend of chaos dashboard](#alternative-solution-2-put-the-rendering-logic-at-the-backend-of-chaos-dashboard)
+    - [Alternative solution 1: New type of WorkflowNode for sending HTTP
+      request](#alternative-solution-1-new-type-of-workflownode-for-sending-http-request)
+    - [Alternative solution 2: put the rendering logic at the backend of chaos
+      dashboard](#alternative-solution-2-put-the-rendering-logic-at-the-backend-of-chaos-dashboard)
   - [Unresolved questions](#unresolved-questions)
+
 ## Summary
 
-Rendering `Task` in Workflow implemented by pure frontend, with common used parameters for HTTP. And more useful context variables like `json` or `http`.
+Rendering `Task` in Workflow implemented by pure frontend, with common used
+parameters for HTTP. And more useful context variables like `json` or `http`.
 
 ## Motivation
 
-The design of `Task` node in Workflow is very common-usable, users could set any workload as one `ContainerSpec` inside the `Task`, and select branches with conditions. But it's quite complex to use the `Task`, users need to write an entire one-line shell to call the utilities in docker image, such as `curl -X GET https://your.application/helath -H 'Required-Token: token'`. And we do not want to introduce more types of WorkflowNode for doing that, so I think rendering the original require of "sending HTTP request" to `Task` is a good idea.
+The design of `Task` node in Workflow is very common-usable, users could set any
+workload as one `ContainerSpec` inside the `Task`, and select branches with
+conditions. But it's quite complex to use the `Task`, users need to write an
+entire one-line shell to call the utilities in docker image, such as `curl -X
+GET https://your.application/helath -H 'Required-Token: token'`. And we do not
+want to introduce more types of WorkflowNode for doing that, so I think
+rendering the original require of "sending HTTP request" to `Task` is a good
+idea.
 
-As the certain context of "sending HTTP request", we could introduce some dedicated context variables only for parsing HTTP status code, and response body. For most usage, an HTTP endpoint like `https://your.application/health` will return `20x` as application is healthy, `50x` as application is not available.
+As the certain context of "sending HTTP request", we could introduce some
+dedicated context variables only for parsing HTTP status code, and response
+body. For most usage, an HTTP endpoint like `https://your.application/health`
+will return `20x` as application is healthy, `50x` as application is not
+available.
 
 ## Detailed design
 
-
 ### Rendering `Task` for sending HTTP request in pure frontend
 
+The basic idea is There are some utilities called "curl command line builder",
+we could borrow the core logic from that.
 
-The basic idea is 
-There are some utilities called "curl command line builder", we could borrow the core logic from that.
+#### Why `curl`
 
-#### Why `curl`?
+We will raise a pod inside of the kubernetes cluster, so we should consider
+about the size of image and multi architecture/platform support.
 
-We will raise a pod inside of the kubernetes cluster, so we should consider about the size of image and multi architecture/platform support. 
-
-I will use `curlimages/curl:7.78.0` as the docker image. It's the latest stable curl for now(2021-09-07). It's small(< 4MB). It supports most common architectures: `386`, `amd64`, `arm64` and so on. 
+I will use `curlimages/curl:7.78.0` as the docker image. It's the latest stable
+curl for now(2021-09-07). It's small(< 4MB). It supports most common
+architectures: `386`, `amd64`, `arm64` and so on.
 
 Why not use other tools like `httpie`?
 
-`httpie` provides more easy flags and better colorful output of HTTP response. But the image is much larger(about 25MB) and no support for other architectures.
+`httpie` provides more easy flags and better colorful output of HTTP response.
+But the image is much larger(about 25MB) and no support for other architectures.
 
 Why not use python/javascript script files with `python` and `node` dockerimage?
 
-Both of official images are large(about 60MB for python and 40MB for node). And it's much harder for generating codes instead of generating command line.
+Both of official images are large(about 60MB for python and 40MB for node). And
+it's much harder for generating codes instead of generating command line.
 
-Why not build another standalone binary tool? 
+Why not build another standalone binary tool?
 
-We do not want reinvent another wheel. :D 
+We do not want reinvent another wheel. :D
 
 #### Frontend form parameters
 
@@ -67,54 +92,72 @@ We will provide the most common used parameters on the frontend:
 - Request body in string
 - Name of configmap that as the content of request body
 
-"Request body in string" and "Name of configmap that as the content of request body" are exclusive.
+"Request body in string" and "Name of configmap that as the content of request
+body" are exclusive.
+
 #### Load request body from ConfigMap as file
 
-`curl` supports loading content from file as request body with `-d`. We could load an existed configmap as the content of request body, the mount path of configmap could be configured.
+`curl` supports loading content from file as request body with `-d`. We could
+load an existed configmap as the content of request body, the mount path of
+configmap could be configured.
 
 #### Advanced configuration
 
 And we could provide advanced configurations:
 
 - flags: custom flags that will be appended at the end of command line directly
-- image: replace the default image `curlimages/curl:7.78.0`, useful in air-gap cluster
+- image: replace the default image `curlimages/curl:7.78.0`, useful in air-gap
+  cluster
 
-#### Frontend component for this certain type of `Task` and preview of generated result
+#### Frontend component for this type of `Task` and preview of generated result
 
-We want store the state into one or several `annotation` of templates, but it could not be done in short future. There are no embedded `metav1.ObjectMeta` inside the `Template`. We'd better to treat `Template` with `WorkflowNode` as `PodTemplateSpec` to `Pod`. I think we should split CRDs for workflow into another subgroup, then upgrade to `v1alpha2`.
+We want store the state into one or several `annotation` of templates, but it
+could not be done in short future. There are no embedded `metav1.ObjectMeta`
+inside the `Template`. We'd better to treat `Template` with `WorkflowNode` as
+`PodTemplateSpec` to `Pod`. I think we should split CRDs for workflow into
+another subgroup, then upgrade to `v1alpha2`.
 
-If we want to show the form of configuration of HTTP request in frontend, we could only parse the command line of `curl`, and that is awful: it's hard to keep consistently between original parameters and parsed parameters. I prefer NOT to do that. But this feature is very important for user to modifying the exists workflow. So I have to implement this. Welcome to other way to implement this.
+If we want to show the form of configuration of HTTP request in frontend, we
+could only parse the command line of `curl`, and that is awful: it's hard to
+keep consistently between original parameters and parsed parameters. I prefer
+NOT to do that. But this feature is very important for user to modifying the
+exists workflow. So I have to implement this. Welcome to other way to implement
+this.
 
 The generated `Task` should show the preview instantly.
 
 ### New context variable: `http`
 
-Although we could use `stdout` to collect the output of `curl`, it meaningless that we do not provide the parsed HTTP context for the next conditional branches.
+Although we could use `stdout` to collect the output of `curl`, it meaningless
+that we do not provide the parsed HTTP context for the next conditional
+branches.
 
-So we will provide another context variable called `http` for introducing the parsed HTTP context. It contains very simplified and common-used HTTP request and response, easy for being used in the conditions.
+So we will provide another context variable called `http` for introducing the
+parsed HTTP context. It contains very simplified and common-used HTTP request
+and response, easy for being used in the conditions.
 
 #### Structure of `http`
 
 ```golang
 type ContextVariableHTTP struct {
-	Request  HTTPRequest  `json:"request"`
-	Response HTTPResponse `json:"response"`
+    Request  HTTPRequest  `json:"request"`
+    Response HTTPResponse `json:"response"`
 }
 type HTTPRequest struct {
-	Method string      `json:"method"`
-	URL    string      `json:"url"`
-	Header http.Header `json:"header"`
-	Body   []byte      `json:"body"`
+    Method string      `json:"method"`
+    URL    string      `json:"url"`
+    Header http.Header `json:"header"`
+    Body   []byte      `json:"body"`
 }
 type HTTPResponse struct {
-	StatusCode int         `json:"statusCode"`
-	Header     http.Header `json:"header"`
-	Body       []byte      `json:"body"`
+    StatusCode int         `json:"statusCode"`
+    Header     http.Header `json:"header"`
+    Body       []byte      `json:"body"`
 }
 
 ```
 
-#### Example conditions:
+#### Example conditions
 
 Response returns 20x:
 
@@ -124,36 +167,54 @@ Response returns 50x:
 
 `http.response.statusCode >= 500`
 
-And used could select these fields in context variable `http`, and use it in the condition.
+And used could select these fields in context variable `http`, and use it in the
+condition.
 
 ## Drawbacks
 
-There are several things that bother me a long time, please leave comments if you have any idea!
+There are several things that bother me a long time, please leave comments if
+you have any idea!
 
 ### parsing curl command inline back into the parameters
 
-Here is one concerned thing about "parsing curl command inline back into the parameters".
+Here is one concerned thing about "parsing curl command inline back into the
+parameters".
 
 Origin demand:
 
-- restore the parameters of HTTP request, for the next show and modification on workflow view.
-- restore the parameters of HTTP request, for the context variable `http.request` 
+- restore the parameters of HTTP request, for the next show and modification on
+  workflow view.
+- restore the parameters of HTTP request, for the context variable
+  `http.request`
 
 Excepted implementation:
 
-Store all the parameters with `annotation`, with specific prefix like `chaos-mesh.opg/workflow.http.method=GET`
+Store all the parameters with `annotation`, with specific prefix like
+`chaos-mesh.opg/workflow.http.method=GET`
 
 Actual implementations:
 
-Because struct `Template` in WorkflowSpec does not embed `metav1.Object`, there is nowhere to place the annotations. So we have to parse the rendered "curl command line". We need a lot of works and tests for keep the parsed result is consistent with the original parameters.
+Because struct `Template` in WorkflowSpec does not embed `metav1.Object`, there
+is nowhere to place the annotations. So we have to parse the rendered "curl
+command line". We need a lot of works and tests for keep the parsed result is
+consistent with the original parameters.
 
 ### parser of context variable `http`, and `stdout`
 
-I want to parse the output of the `curl`, with flag `-v`. It will print the detail of this HTTP request to `stderr`, and print response body to `stdout`. So we need a parser, with a lot of testcase about `curl`'s output and expected `HTTPResponse`.
+I want to parse the output of the `curl`, with flag `-v`. It will print the
+detail of this HTTP request to `stderr`, and print response body to `stdout`. So
+we need a parser, with a lot of testcase about `curl`'s output and expected
+`HTTPResponse`.
 
-And about the `-L` and http `301`/`302`, I think only keep the last response is the right way.
+And about the `-L` and http `301`/`302`, I think only keep the last response is
+the right way.
 
-Another thing is the `stdout` context variable is not only contains `stdout`, but also `stderr`. It might bring confusing for users. But kubernetes does not provide a way to split `stdout` and `stderr` from the `log` subresource from `Pod`, we have no idea expected implement collector for each container runtime. It will not break anything yet, but it does bring a little mess. Maybe we need a rename, from `stdout` to `log`.
+Another thing is the `stdout` context variable is not only contains `stdout`,
+but also `stderr`. It might bring confusing for users. But kubernetes does not
+provide a way to split `stdout` and `stderr` from the `log` subresource from
+`Pod`, we have no idea expected implement collector for each container runtime.
+It will not break anything yet, but it does bring a little mess. Maybe we need a
+rename, from `stdout` to `log`.
 
 ## Alternatives
 
@@ -168,4 +229,5 @@ Another thing is the `stdout` context variable is not only contains `stdout`, bu
 
 ## Unresolved questions
 
-- This implementation is not so friendly to users with pure command-line and yaml files.
+- This implementation is not so friendly to users with pure command-line and
+  yaml files.
