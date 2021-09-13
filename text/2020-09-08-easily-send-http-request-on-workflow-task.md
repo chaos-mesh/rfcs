@@ -1,33 +1,24 @@
 # Easily Send HTTP Request On Workflow Task
 
-- [Easily Send HTTP Request On Workflow
-  Task](#easily-send-http-request-on-workflow-task)
+- [Easily Send HTTP Request On Workflow Task](#easily-send-http-request-on-workflow-task)
   - [Summary](#summary)
   - [Motivation](#motivation)
   - [Detailed design](#detailed-design)
-    - [Rendering `Task` for sending HTTP request in pure
-      frontend](#rendering-task-for-sending-http-request-in-pure-frontend)
-      - [Why `curl`?](#why-curl)
+    - [Rendering `Task` for sending HTTP request in pure frontend](#rendering-task-for-sending-http-request-in-pure-frontend)
+      - [Why `curl`](#why-curl)
       - [Frontend form parameters](#frontend-form-parameters)
-      - [Load request body from ConfigMap as
-        file](#load-request-body-from-configmap-as-file)
+      - [Load request body from ConfigMap as file](#load-request-body-from-configmap-as-file)
       - [Advanced configuration](#advanced-configuration)
-      - [Frontend component for this certain type of `Task` and preview of
-        generated
-        result](#frontend-component-for-this-certain-type-of-task-and-preview-of-generated-result)
+      - [Frontend component for this type of `Task` and preview of generated result](#frontend-component-for-this-type-of-task-and-preview-of-generated-result)
     - [New context variable: `http`](#new-context-variable-http)
       - [Structure of `http`](#structure-of-http)
-      - [Example conditions:](#example-conditions)
+      - [Example conditions](#example-conditions)
   - [Drawbacks](#drawbacks)
-    - [parsing curl command inline back into the
-      parameters](#parsing-curl-command-inline-back-into-the-parameters)
-    - [parser of context variable `http`, and
-      `stdout`](#parser-of-context-variable-http-and-stdout)
+    - [parsing curl command inline back into the parameters](#parsing-curl-command-inline-back-into-the-parameters)
+    - [parser of context variable `http`, and `stdout`](#parser-of-context-variable-http-and-stdout)
   - [Alternatives](#alternatives)
-    - [Alternative solution 1: New type of WorkflowNode for sending HTTP
-      request](#alternative-solution-1-new-type-of-workflownode-for-sending-http-request)
-    - [Alternative solution 2: put the rendering logic at the backend of chaos
-      dashboard](#alternative-solution-2-put-the-rendering-logic-at-the-backend-of-chaos-dashboard)
+    - [Alternative solution 1: New type of WorkflowNode for sending HTTP request](#alternative-solution-1-new-type-of-workflownode-for-sending-http-request)
+    - [Alternative solution 2: put the rendering logic at the backend of chaos dashboard](#alternative-solution-2-put-the-rendering-logic-at-the-backend-of-chaos-dashboard)
   - [Unresolved questions](#unresolved-questions)
 
 ## Summary
