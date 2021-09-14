@@ -18,7 +18,6 @@
     - [parser of context variable `http`, and `stdout`](#parser-of-context-variable-http-and-stdout)
   - [Alternatives](#alternatives)
     - [Alternative solution 1: New type of WorkflowNode for sending HTTP request](#alternative-solution-1-new-type-of-workflownode-for-sending-http-request)
-    - [Alternative solution 2: put the rendering logic at the backend of chaos dashboard](#alternative-solution-2-put-the-rendering-logic-at-the-backend-of-chaos-dashboard)
   - [Unresolved questions](#unresolved-questions)
 
 ## Summary
@@ -219,13 +218,6 @@ rename, from `stdout` to `log`.
 ## Alternatives
 
 ### Alternative solution 1: New type of WorkflowNode for sending HTTP request
-
-### Alternative solution 2: put the rendering logic at the backend of chaos dashboard
-
-- Why is this design the best in the space of possible designs?
-- What other designs have been considered and what is the rationale for not
-  choosing them?
-- What is the impact of not doing this?
 
 ## Unresolved questions
 
