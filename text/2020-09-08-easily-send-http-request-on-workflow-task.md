@@ -85,10 +85,15 @@ We will provide the most common used parameters on the frontend:
 - URL
 - Custom headers
 - Request body in string
-- Name of configmap that as the content of request body
+- Path of the file that as the content of request body
 
-"Request body in string" and "Name of configmap that as the content of request
-body" are exclusive.
+"Request body in string" and "Path of the file that as the content of request body"
+are exclusive.
+
+> I used to mount "configmap" into the pod, and use it's content as the request body
+> directly. But it's could not be implemented now, because the name of configmap
+> would not appear in the command line, so parser could not rebuild this, round-trip
+> not works.
 
 #### Load request body from ConfigMap as file
 
