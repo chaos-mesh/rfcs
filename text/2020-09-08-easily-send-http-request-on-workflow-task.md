@@ -4,7 +4,7 @@
   - [Summary](#summary)
   - [Motivation](#motivation)
   - [Detailed design](#detailed-design)
-    - [Rendering `Task` for sending HTTP request in pure frontend](#rendering-task-for-sending-http-request-in-pure-frontend)
+    - [Rendering `Task` for sending HTTP request](#rendering-task-for-sending-http-request)
       - [Why `curl`](#why-curl)
       - [Frontend form parameters](#frontend-form-parameters)
       - [Load request body from ConfigMap as file](#load-request-body-from-configmap-as-file)
@@ -23,8 +23,12 @@
 
 ## Summary
 
-Rendering `Task` in Workflow implemented by pure frontend, with common used
-parameters for HTTP. And more useful context variables like `json` or `http`.
+Rendering `curl` command line into Workflow `Task`  with parameters, with common
+used parameters for HTTP. And more useful context variables like `json` or `http`.
+
+> I used to design the rendering logic with pure frontend/typescript, but as the
+> requirement of "parsing curl command line", I think using golang is better to
+> reuse the codes and round-trip testing.
 
 ## Motivation
 
@@ -45,7 +49,7 @@ available.
 
 ## Detailed design
 
-### Rendering `Task` for sending HTTP request in pure frontend
+### Rendering `Task` for sending HTTP request
 
 The basic idea is There are some utilities called "curl command line builder",
 we could borrow the core logic from that.
