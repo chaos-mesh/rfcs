@@ -17,7 +17,7 @@
     - [parsing curl command inline back into the parameters](#parsing-curl-command-inline-back-into-the-parameters)
     - [parser of context variable `http`, and `stdout`](#parser-of-context-variable-http-and-stdout)
   - [Alternatives](#alternatives)
-    - [Alternative solution 1: New type of WorkflowNode for sending HTTP request](#alternative-solution-1-new-type-of-workflownode-for-sending-http-request)
+    - [Alternative solution 1: New type of WorkflowNode/Template for sending HTTP request](#alternative-solution-1-new-type-of-workflownodetemplate-for-sending-http-request)
   - [Unresolved questions](#unresolved-questions)
 
 ## Summary
@@ -217,7 +217,11 @@ rename, from `stdout` to `log`.
 
 ## Alternatives
 
-### Alternative solution 1: New type of WorkflowNode for sending HTTP request
+### Alternative solution 1: New type of WorkflowNode/Template for sending HTTP request
+
+I do really want to add some annotations as the metadata of rendering this Template,
+but I will not turn them into the "official" fields of CRD. Current CRD is powerful
+enough for describing the behavior.
 
 ## Unresolved questions
 
