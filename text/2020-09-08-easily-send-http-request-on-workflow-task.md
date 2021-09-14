@@ -15,7 +15,7 @@
       - [Example conditions](#example-conditions)
   - [Drawbacks](#drawbacks)
     - [parsing curl command inline back into the parameters](#parsing-curl-command-inline-back-into-the-parameters)
-    - [parser of context variable `http`, and `stdout`](#parser-of-context-variable-http-and-stdout)
+    - [parser of context variable `http`](#parser-of-context-variable-http)
   - [Alternatives](#alternatives)
     - [Alternative solution 1: New type of WorkflowNode/Template for sending HTTP request](#alternative-solution-1-new-type-of-workflownodetemplate-for-sending-http-request)
   - [Unresolved questions](#unresolved-questions)
@@ -198,22 +198,14 @@ is nowhere to place the annotations. So we have to parse the rendered "curl
 command line". We need a lot of works and tests for keep the parsed result is
 consistent with the original parameters.
 
-### parser of context variable `http`, and `stdout`
+### parser of context variable `http`
 
-I want to parse the output of the `curl`, with flag `-v`. It will print the
-detail of this HTTP request to `stderr`, and print response body to `stdout`. So
-we need a parser, with a lot of testcase about `curl`'s output and expected
-`HTTPResponse`.
+I want to parse the output of the `curl`, with flag `-i`. It will print both response
+header and body to `stdout`. So we need a parser, with a lot of testcase about
+`curl`'s output and expected `HTTPResponse`.
 
 And about the `-L` and http `301`/`302`, I think only keep the last response is
 the right way.
-
-Another thing is the `stdout` context variable is not only contains `stdout`,
-but also `stderr`. It might bring confusing for users. But kubernetes does not
-provide a way to split `stdout` and `stderr` from the `log` subresource from
-`Pod`, we have no idea expected implement collector for each container runtime.
-It will not break anything yet, but it does bring a little mess. Maybe we need a
-rename, from `stdout` to `log`.
 
 ## Alternatives
 
