@@ -207,6 +207,13 @@ header and body to `stdout`. So we need a parser, with a lot of testcase about
 And about the `-L` and http `301`/`302`, I think only keep the last response is
 the right way.
 
+Another thing is the `stdout` context variable is not only contains `stdout`,
+but also `stderr`. It might bring confusing for users. But kubernetes does not
+provide a way to split `stdout` and `stderr` from the `log` subresource from
+`Pod`, we have no idea expected implement collector for each container runtime.
+It will not break anything yet, but it does bring a little mess. Maybe we need a
+rename, from `stdout` to `log`.
+
 ## Alternatives
 
 ### Alternative solution 1: New type of WorkflowNode/Template for sending HTTP request
