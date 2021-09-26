@@ -65,8 +65,8 @@ library to conveniently build nested API servers in the ecosystem of golang.
 ### GraphQL
 
 The GraphQL is one of the most famous solutions for structural APIs. In above
-case, we can easy fetch iptables resources only by query `{ networkchaos {
-iptables } }`. However, the main drawback of this solution is that queries are
+case, we can easy fetch iptables resources only by query `{ networkchaos
+{iptables } }`. However, the main drawback of this solution is that queries are
 not convenient to edit in cli, we need translation between resource paths and
 GraphQL queries.
 
@@ -127,9 +127,9 @@ query GetIptables($name: String!, $podName: String!) {
 We can improve auto-completion with the schema and data. For example, when the
 user types `chaosctl get /network`, we can complete the command to `chaosctl get
 /networkchaos/` or `chaosctl get /networkchaoses` by schema. Then, if the user
-choose `chaosctl get /networkchaos/`, we can send query `{ networkchaos { name }
-}` and complete the command to `chaosctl get /networkchaos/\<name>` by the
-result.
+choose `chaosctl get /networkchaos/`, we can send query
+`{ networkchaos { name}}` and complete the command to
+`chaosctl get /networkchaos/<name>` by the result.
 
 ## Alternatives
 
