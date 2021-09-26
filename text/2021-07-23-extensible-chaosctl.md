@@ -3,7 +3,7 @@
 ## Summary
 
 A tool to control the status of Chaos Mesh as much as possible in an extensible
-way. 
+way.
 
 ## Motivation
 
@@ -18,7 +18,6 @@ develpment difficulties in the long time.
 
 To implement more features for chaosctl, we must refactor it for more security
 and extensibility.
-
 
 ## Detailed Design
 
@@ -99,7 +98,6 @@ We provide two basic debug subcommands, `get` and `desc`. The `get` command only
 shows key information like `name` or `id` of resources while `desc` command
 shows full information.
 
-
 - `delete`
 
 We will provide `delete` subcommand, witch will delete identified resources.
@@ -130,7 +128,7 @@ We can improve auto-completion with the schema and data. For example, when the
 user types `chaosctl get /network`, we can complete the command to `chaosctl get
 /networkchaos/` or `chaosctl get /networkchaoses` by schema. Then, if the user
 choose `chaosctl get /networkchaos/`, we can send query `{ networkchaos { name }
-}` and complete the command to `chaosctl get /networkchaos/<name>` by the
+}` and complete the command to `chaosctl get /networkchaos/\<name>` by the
 result.
 
 ## Alternatives
