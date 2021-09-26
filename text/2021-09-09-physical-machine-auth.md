@@ -65,7 +65,7 @@ spec:
     hostname: “baidu.com”
     duration: "5s"
   selector:
-    namespaces: 
+    namespaces:
       - testA
     labelSelectors:
       chaos-mesh/physical-machine-group: abc
@@ -88,7 +88,7 @@ namespace.
 ### service-to-service authentication
 
 To secure the service-to-service communication, establish an mTLS connection
-between chaos-controller-manager and chaosd. 
+between chaos-controller-manager and chaosd.
 
 The following certificates are required:
 
@@ -158,7 +158,7 @@ Prerequisites:
 Steps:
 
 1. User uses `chaosctl` to create `PhysicalMachine` resource in Kubernetes
-cluster, the command might be 
+cluster, the command might be
 `chaosctl physical-machine create --server=127.0.0.1 --port=2333 --protocol=http`
 1. User starts chaosd service on the physical machine
 1. User creates a physical machine experiment on the dashboard
