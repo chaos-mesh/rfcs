@@ -93,7 +93,7 @@ between chaos-controller-manager and chaosd.
 The following certificates are required:
 
 - CA certificate: generated when deploying `Chaos Mesh` with `helm` or
-`instal.sh`, and saved in the secret named
+`install.sh`, and saved in the secret named
 `chaos-mesh-controller-manager-client-certs` (and on each physical machine)
 - certificate of chaos-controller-manager side: generated when deploying
 `Chaos Mesh` with `helm` or `install.sh`, and saved in the secret named
