@@ -44,11 +44,11 @@ When returning errors, consider the following to determine the best choice:
 
 ```go
 type ErrNotFound struct {
-  File string
+   File string
 }
 
 func open(file string) error {
-  return errors.WithStack(ErrNotFound{file: file})
+   return errors.WithStack(ErrNotFound{file: file})
 }
 ```
 
@@ -63,7 +63,7 @@ simple error variable with wrap is prefered, e.g.
 var ErrNotFound = errors.New("not found")
 
 func open(file string) error {
-  return errors.Wrapf(ErrNotFound, "open file %s", file)
+   return errors.Wrapf(ErrNotFound, "open file %s", file)
 }
 ```
 
@@ -71,9 +71,9 @@ func open(file string) error {
 
 ```go
 var (
-    ErrPodNotFound = errors.New("pod not found")
+   ErrPodNotFound = errors.New("pod not found")
 
-    ErrPodNotRunning = errors.New("pod not running")
+   ErrPodNotRunning = errors.New("pod not running")
 )
 ```
 
@@ -87,7 +87,7 @@ var errNotFound = errors.New("not found")
 
 ```go
 func open(file string) error {
-  return errors.New("not found")
+   return errors.New("not found")
 }
 ```
 
@@ -96,9 +96,9 @@ func open(file string) error {
 ```go
 func startProcess(cmd *exec.Cmd) error {
    err := cmd.Start()
-    if err != nil {
-        return nil, errors.WithStack(err)
-    }
+   if err != nil {
+      return nil, errors.WithStack(err)
+   }
 
    return nil
 }
@@ -122,9 +122,9 @@ The context usually includes: what you are doing, the object of the operation
 ```go
 func startProcess(cmd *exec.Cmd) error {
    err := cmd.Start()
-    if err != nil {
-        return nil, errors.Errorf("start process: %v", err)
-    }
+   if err != nil {
+      return nil, errors.Errorf("start process: %v", err)
+   }
 
    return nil
 }
@@ -138,9 +138,9 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
    ...
 
    control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
-    if err != nil {
-        return nil, errors.Wrapf(err, "load cgroup of pid %d", pid)
-    }
+   if err != nil {
+      return nil, errors.Wrapf(err, "load cgroup of pid %d", pid)
+   }
 
    ...
 }
@@ -158,8 +158,8 @@ percolates up through the stack:
 ```go
 s, err := store.New()
 if err != nil {
-    return fmt.Errorf(
-        "failed to create new store: %v", err)
+   return fmt.Errorf(
+      "failed to create new store: %v", err)
 }
 ```
 
@@ -168,8 +168,8 @@ if err != nil {
 ```go
 s, err := store.New()
 if err != nil {
-    return fmt.Errorf(
-        "new store: %v", err)
+   return fmt.Errorf(
+      "new store: %v", err)
 }
 ```
 
@@ -244,7 +244,7 @@ A template implementation for `IsXXX` could be:
 package error
 
 import (
-   "google.golang.org/grpc/status"  ww
+   "google.golang.org/grpc/status"
    "google.golang.org/grpc/code"
 )
 
