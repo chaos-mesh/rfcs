@@ -172,8 +172,9 @@ if err != nil {
         "new store: %v", err)
 }
 ```
-
-<tr><td>
+</td></tr>
+</tbody>
+</table>
 
 ### Error Handling
 
