@@ -4,8 +4,8 @@
 
 There are a lot of different error handling pattern in Chaos Mesh. Some of the
 errors in the code are equipped with a backtrace, while some are not. The mass
-in error handling has been blocking us from diagnosing the problem and handling 
-potential errors. The Chaos Mesh code base imports `github.com/pingcap/errors`, 
+in error handling has been blocking us from diagnosing the problem and handling
+potential errors. The Chaos Mesh code base imports `github.com/pingcap/errors`,
 `github.com/pkg/errors` and the `errors` in standard library.
 
 ## Proposal
@@ -32,7 +32,7 @@ When returning errors, consider the following to determine the best choice:
    please create a new `notFound` error under every package.
 4. Is this really a simple error that will not appear in other functions? If so,
    you should use an inline `errors.New`. The `errors.New` in `pkg/errors` is
-   already equipped with a stack backtrace, so you don't need to add it again. 
+   already equipped with a stack backtrace, so you don't need to add it again.
 5. Are you propagating an error returned by other functions? If it's returned by
    function inside the Chaos Mesh, we could assume this error is already
    equipped with a stack backtrace, so there is not need to call
@@ -53,7 +53,7 @@ func open(file string) error {
 ```
 
 Then the user will be able to use `errors.As` to extract the `ErrNotFound`
-error, and get the `File` field. 
+error, and get the `File` field.
 
 A new pub type of an error should be created carefully, if you don't think the
 field will be useful for error handling, you should not create a new type, and a
@@ -71,9 +71,9 @@ func open(file string) error {
 
 ```go
 var (
-	ErrPodNotFound = errors.New("pod not found")
+    ErrPodNotFound = errors.New("pod not found")
 
-	ErrPodNotRunning = errors.New("pod not running")
+    ErrPodNotRunning = errors.New("pod not running")
 )
 ```
 
@@ -96,9 +96,9 @@ func open(file string) error {
 ```go
 func startProcess(cmd *exec.Cmd) error {
    err := cmd.Start()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
 
    return nil
 }
@@ -122,9 +122,9 @@ The context usually includes: what you are doing, the object of the operation
 ```go
 func startProcess(cmd *exec.Cmd) error {
    err := cmd.Start()
-	if err != nil {
-		return nil, errors.Errorf("start process: %v", err)
-	}
+    if err != nil {
+        return nil, errors.Errorf("start process: %v", err)
+    }
 
    return nil
 }
@@ -134,13 +134,13 @@ A more realistic example in `chaos-daemon` is:
 
 ```go
 func (s *DaemonServer) ExecStressors(ctx context.Context,
-	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+    req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
    ...
 
    control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
-	if err != nil {
-		return nil, errors.Wrapf(err, "load cgroup of pid %d", pid)
-	}
+    if err != nil {
+        return nil, errors.Wrapf(err, "load cgroup of pid %d", pid)
+    }
 
    ...
 }
@@ -172,6 +172,7 @@ if err != nil {
         "new store: %v", err)
 }
 ```
+
 </td></tr>
 </tbody>
 </table>
@@ -274,7 +275,7 @@ it out, as it will be printed by its ancestors.
 
 If the logger has setupped, you could use `log.Error` to print the error. The
 `zapr` implementation of `logr` will add `errorVerbose` and `errorCause` fields
-to represent the full information of the error (with `%+v`). 
+to represent the full information of the error (with `%+v`).
 
 If the logger hasn't setupped, you could use `fmt.Printf("%+v", err)` to print
 the error, or with additional context.
