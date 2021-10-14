@@ -49,7 +49,7 @@ hoping to modify the names to standardize naming. More about naming, see this
 guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming/).
 
 <!-- markdownlint-disable MD013 -->
-| **Name**                                              | **Desc**                                               | **Type**     | **Label**                   | **Buckets**                  |
+| Name                                                  | Description                                            | Type         | Label                       | Buckets                      |
 |-------------------------------------------------------|--------------------------------------------------------|--------------|-----------------------------|------------------------------|
 | chaos_controller_manager_reconcile_duration_seconds   | time histogram for each `Reconcile()` in `Reconciler`  | HistogramVec | type                        | DefBuckets                   |
 | chaos_controller_manager_chaos_schedule_count         | currrent count of Schedule                             | GaugeVec     | namespace                   | /                            |
@@ -58,7 +58,7 @@ guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming
 | chaos_controller_manager_grpc_client_handling_seconds | common metrics of grpc-client                          | HistogramVec | code, method, service, type | DefBuckets                   |
 | chaos_controller_manager_webhook_duration_seconds     | metrics for kubernetes webhook - duration              | HistogramVec | type, allowed               | WebhookDurationBuckets       |
 | chaos_controller_manager_webhook_request_total        | metrics for kubernetes webhook - request count         | CountVec     | type, allowed               | /                            |
-| chaos_daemon_grpc_server_handling_seconds             | common metrics of grpc-server                          | /            | /                           | ChaosDeamonGrpcServerBuckets |
+| chaos_daemon_grpc_server_handling_seconds             | common metrics of grpc-server                          | /            | /                           | ChaosDaemonGrpcServerBuckets |
 | chaos_daemon_bpm_controlled_process_total             | total of processes controlled by `bpm`                 | Count        | /                           | /                            |
 | chaos_daemon_bpm_controlled_process_count             | current count of processes controlled by `bpm`         | Guage        | /                           | /                            |
 | chaos_daemon_iptables_chain_count                     | current count of iptables chains                       | GaugeVec     | container_id                | /                            |
@@ -70,6 +70,7 @@ guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming
 | chaos_dashboard_http_request_duration_seconds         | time histogram for each HTTP query                     | HistogramVec | code, path, method          | DefBuckets                   |
 | chaos_dashboard_archived_object_count                 | current count for archived object                      | GaugeVec     | type                        | /                            |
 | chaos_dashboard_reconcile_duration_seconds            | time histogram for archive reconciler                  | HistogramVec | type                        | DefBuckets                   |
+
 <!-- markdownlint-enable -->
 
 The current design of Buckets is shown in the table below. The distribution of
@@ -77,11 +78,12 @@ these data needs to be obtained later in order to adjust the values so that the
 number of samples in each bucket is similar.
 
 <!-- markdownlint-disable MD013 -->
-| Buckets name                 | value                                                             | DESC                                                                       |
+
+| Buckets Name                 | Value                                                             | Description                                                                |
 |------------------------------|-------------------------------------------------------------------|----------------------------------------------------------------------------|
 | DefBuckets                   | `[]float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10}`     | default prometheus buckets                                                 |
 | WebhookDurationBuckets       | `[]float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10, 30}` | add 30s webhook timeout period on `DefBuckets`                             |
-| ChaosDeamonGrpcServerBuckets | `[]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}`              | the buckets settings have been implemented, just set constants for clarity |
+| ChaosDaemonGrpcServerBuckets | `[]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}`              | the buckets settings have been implemented, just set constants for clarity |
 <!-- markdownlint-enable -->
 
 ### Collecting Plan
@@ -108,7 +110,7 @@ func newGRPCServer(reg prometheus.Registerer, ...) (*grpc.Server, error) {
     grpcMetrics := grpc_prometheus.NewServerMetrics()
     grpcMetrics.EnableHandlingTimeHistogram(
         // here we set customized ChaosDeamonGrpcServerBuckets, and customized histogram name
-        grpc_prometheus.WithHistogramBuckets(ChaosDeamonGrpcServerBuckets),
+        grpc_prometheus.WithHistogramBuckets(ChaosDaemonGrpcServerBuckets),
         withHistogramName("chaos_deamon_grpc_server_handling_seconds"),
     )
     reg.MustRegister(grpcMetrics)
