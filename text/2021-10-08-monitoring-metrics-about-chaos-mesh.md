@@ -2,7 +2,7 @@
 
 ## Summary
 
-More metrics is needed for improving observability of `chaos-controller-manager`,
+More metrics are needed for improving the observability of `chaos-controller-manager`,
 `chaos-daemon` and `chaos-dashboard`. Now, we already have several metrics in
 `chaos-controller-manager` and `chaos-daemon`, but it's not enough.
 
@@ -74,7 +74,7 @@ guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming
 <!-- markdownlint-enable -->
 
 The current design of Buckets is shown in the table below. The distribution of
-these data needs to be obtained later in order to adjust the values so that the
+these data need to be obtained later in order to adjust the values so that the
 number of samples in each bucket is similar.
 
 <!-- markdownlint-disable MD013 -->
@@ -89,7 +89,7 @@ number of samples in each bucket is similar.
 ### Collecting Plan
 
 Here will introduce the metrics collection ways in complex scenarios. Common
-collection methods such as pull mode,  can be found in `controllers/metrics/metrics.go`.
+collection methods such as pull mode can be found in `controllers/metrics/metrics.go`.
 
 #### gRPC
 
