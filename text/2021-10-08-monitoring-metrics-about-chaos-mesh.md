@@ -23,7 +23,7 @@ chaos-controller-manager:
 - count of Chaos Experiments, Schedule, and Workflow
 - count of the emitted event by chaos-controller-manager
 - common metrics of grpc-client
-- metrics for kubernetes webhook
+- metrics for kubernetes webhook (already provided by `controller-runtime`)
 
 chaos-daemon:
 
@@ -56,8 +56,6 @@ guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming
 | chaos_controller_manager_chaos_workflow_count         | currrent count of Workflow                             | GuageVec     | namespace                              | /                            |
 | chaos_controller_manager_emitted_event_count          | count of the emitted event by chaos-controller-manager | GaugeVec     | type, reason                           | /                            |
 | chaos_controller_manager_grpc_client_handling_seconds | common metrics of grpc-client                          | HistogramVec | code, method, service, type            | DefBuckets                   |
-| chaos_controller_manager_webhook_duration_seconds     | metrics for kubernetes webhook - duration              | HistogramVec | type, allowed                          | WebhookDurationBuckets       |
-| chaos_controller_manager_webhook_request_total        | metrics for kubernetes webhook - request count         | CountVec     | type, allowed                          | /                            |
 | chaos_daemon_grpc_server_handling_seconds             | common metrics of grpc-server                          | /            | /                                      | ChaosDaemonGrpcServerBuckets |
 | chaos_daemon_bpm_controlled_process_total             | total of processes controlled by `bpm`                 | Count        | /                                      | /                            |
 | chaos_daemon_bpm_controlled_process_count             | current count of processes controlled by `bpm`         | Guage        | /                                      | /                            |
@@ -82,7 +80,6 @@ number of samples in each bucket is similar.
 | Buckets Name                 | Value                                                             | Description                                                                |
 |------------------------------|-------------------------------------------------------------------|----------------------------------------------------------------------------|
 | DefBuckets                   | `[]float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10}`     | default prometheus buckets                                                 |
-| WebhookDurationBuckets       | `[]float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10, 30}` | add 30s webhook timeout period on `DefBuckets`                             |
 | ChaosDaemonGrpcServerBuckets | `[]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}`              | the buckets settings have been implemented, just set constants for clarity |
 <!-- markdownlint-enable -->
 
@@ -138,71 +135,6 @@ func Run(params RunParams) error {
     // ...
     // register grpc_prometheus client metrics
     controllermetrics.Registry.MustRegister(grpc_prometheus.DefaultClientMetrics)
-    // ...
-}
-```
-
-#### Webhooks
-
-The chaos experiments as `admission.Defaulter` and `admission.Validator` in the
-Webhook need to be called in `mutationHandler` and `validatingHandler`, and
-finally generate a response containing the `allowed` tag. This code is part of
-the controller-runtime framework, so metrics cannot be collected in situ. So we
-need to implement `chaos_controller_manager_webhook_request_total` and
-`chaos_controller_manager_webhook_duration_seconds` by wrapping the Webhook:
-
-```go
-// webhook handler should implement two interfaces below
-type Handler interface {
-    admission.DecoderInjector
-    admission.Handler
-}
-
-// HandlerWrapper wraps webhook handler to override Handle function to collect webhook metrics
-type HandlerWrapper struct {
-    handler Handler
-}
-
-var _ Handler = &HandlerWrapper{}
-
-func (wrapper *HandlerWrapper) Handle(ctx context.Context, request admission.Request) admission.Response {
-    resp := wrapper.handler.Handle(ctx, request)
-    // here several metrics could be collected
-    return resp
-}
-
-// InjectDecoder used to inject decoder which decodes each request body into object
-func (wrapper *HandlerWrapper) InjectDecoder(decoder *admission.Decoder) error {
-    return wrapper.handler.InjectDecoder(decoder)
-}
-
-func WrapWebhookHandler(webhook *admission.Webhook) *admission.Webhook {
-    handler := webhook.Handler.(Handler)
-    webhook.Handler = &HandlerWrapper{handler}
-    return webhook
-}
-
-func RegisterWebhookWithMetrics(manager ctrl.Manager, object types.Object) {
-    gvk := schema.GroupVersionKind{
-            Group:   v1alpha1.GroupVersion.Group,
-            Version: v1alpha1.GroupVersion.Version,
-            Kind:    reflect.TypeOf(object.Object).Elem().Name(),
-    }
-
-    manager.GetWebhookServer().Register(generateMutatePath(gvk), WrapWebhookHandler(
-            admission.DefaultingWebhookFor(defaulter),
-    ))
-
-    manager.GetWebhookServer().Register(generateValidatePath(gvk), WrapWebhookHandler(
-            admission.ValidatingWebhookFor(validator),
-    ))
-}
-
-func Run(params RunParams) error {
-    var err error
-    for _, obj := range params.Objs {
-        RegisterWebhookWithMetrics(params.Mgr, obj)
-    }
     // ...
 }
 ```
