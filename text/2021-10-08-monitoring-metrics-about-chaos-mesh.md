@@ -52,21 +52,21 @@ guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming
 | Name                                                  | Description                                            | Type         | Label                                  | Buckets                      |
 |-------------------------------------------------------|--------------------------------------------------------|--------------|----------------------------------------|------------------------------|
 | chaos_controller_manager_reconcile_duration_seconds   | time histogram for each `Reconcile()` in `Reconciler`  | HistogramVec | type                                   | DefBuckets                   |
-| chaos_controller_manager_chaos_schedule_count         | currrent count of Schedule                             | GaugeVec     | namespace                              | /                            |
-| chaos_controller_manager_chaos_workflow_count         | currrent count of Workflow                             | GuageVec     | namespace                              | /                            |
-| chaos_controller_manager_emitted_event_count          | count of the emitted event by chaos-controller-manager | GaugeVec     | type, reason                           | /                            |
+| chaos_controller_manager_chaos_schedules              | currrent count of Schedule                             | GaugeVec     | namespace                              | /                            |
+| chaos_controller_manager_chaos_workflows              | currrent count of Workflow                             | GuageVec     | namespace                              | /                            |
+| chaos_controller_manager_emitted_events               | count of the emitted event by chaos-controller-manager | GaugeVec     | type, reason                           | /                            |
 | chaos_controller_manager_grpc_client_handling_seconds | common metrics of grpc-client                          | HistogramVec | code, method, service, type            | DefBuckets                   |
 | chaos_daemon_grpc_server_handling_seconds             | common metrics of grpc-server                          | /            | /                                      | ChaosDaemonGrpcServerBuckets |
 | chaos_daemon_bpm_controlled_process_total             | total of processes controlled by `bpm`                 | Count        | /                                      | /                            |
-| chaos_daemon_bpm_controlled_process_count             | current count of processes controlled by `bpm`         | Guage        | /                                      | /                            |
-| chaos_daemon_iptables_chain_count                     | current count of iptables chains                       | GaugeVec     | pod_name, container_name               | /                            |
-| chaos_daemon_iptables_rule_count                      | current count of iptables rules                        | GaugeVec     | pod_name, container_name, table, chain | /                            |
-| chaos_daemon_iptables_packet_count                    | current count of all packet                            | GaugeVec     | pod_name, container_name, table, chain | /                            |
+| chaos_daemon_bpm_controlled_processes                 | current count of processes controlled by `bpm`         | Guage        | /                                      | /                            |
+| chaos_daemon_iptables_chains                          | current count of iptables chains                       | GaugeVec     | pod_name, container_name               | /                            |
+| chaos_daemon_iptables_rules                           | current count of iptables rules                        | GaugeVec     | pod_name, container_name, table, chain | /                            |
+| chaos_daemon_iptables_packets                         | current count of all packet                            | GaugeVec     | pod_name, container_name, table, chain | /                            |
 | chaos_daemon_iptables_packet_bytes                    | current values of all packet byte                      | GaugeVec     | pod_name, container_name, table, chain | /                            |
-| chaos_daemon_ipset_member_count                       | current count of members in an ipset                   | GuageVec     | pod_name, container_name, name         | /                            |
-| chaos_daemon_tc_count                                 | current count of tc rules                              | GuageVec     | pod_name, container_name               | /                            |
+| chaos_daemon_ipset_members                            | current count of members in an ipset                   | GuageVec     | pod_name, container_name, name         | /                            |
+| chaos_daemon_tcs                                      | current count of tc rules                              | GuageVec     | pod_name, container_name               | /                            |
 | chaos_dashboard_http_request_duration_seconds         | time histogram for each HTTP query                     | HistogramVec | code, path, method                     | DefBuckets                   |
-| chaos_dashboard_archived_object_count                 | current count for archived object                      | GaugeVec     | type                                   | /                            |
+| chaos_dashboard_archived_objects                      | current count for archived object                      | GaugeVec     | type                                   | /                            |
 | chaos_dashboard_reconcile_duration_seconds            | time histogram for archive reconciler                  | HistogramVec | type                                   | DefBuckets                   |
 
 <!-- markdownlint-enable -->
