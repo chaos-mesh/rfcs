@@ -54,7 +54,7 @@ guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming
 | chaos_controller_manager_reconcile_duration_seconds   | time histogram for each `Reconcile()` in `Reconciler`  | HistogramVec | type                                   | DefBuckets                   |
 | chaos_controller_manager_chaos_schedules              | currrent count of Schedule                             | GaugeVec     | namespace                              | /                            |
 | chaos_controller_manager_chaos_workflows              | currrent count of Workflow                             | GuageVec     | namespace                              | /                            |
-| chaos_controller_manager_emitted_events               | count of the emitted event by chaos-controller-manager | GaugeVec     | type, reason                           | /                            |
+| chaos_controller_manager_emitted_event_total          | count of the emitted event by chaos-controller-manager | CounterVec   | type, reason, namespace                | /                            |
 | chaos_controller_manager_grpc_client_handling_seconds | common metrics of grpc-client                          | HistogramVec | code, method, service, type            | DefBuckets                   |
 | chaos_daemon_grpc_server_handling_seconds             | common metrics of grpc-server                          | /            | /                                      | ChaosDaemonGrpcServerBuckets |
 | chaos_daemon_bpm_controlled_process_total             | total of processes controlled by `bpm`                 | Count        | /                                      | /                            |
