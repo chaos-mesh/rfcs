@@ -51,7 +51,6 @@ guideline: [Metric and label naming](https://prometheus.io/docs/practices/naming
 <!-- markdownlint-disable MD013 -->
 | Name                                                  | Description                                            | Type         | Label                                  | Buckets                      |
 |-------------------------------------------------------|--------------------------------------------------------|--------------|----------------------------------------|------------------------------|
-| chaos_controller_manager_reconcile_duration_seconds   | time histogram for each `Reconcile()` in `Reconciler`  | HistogramVec | type                                   | DefBuckets                   |
 | chaos_controller_manager_chaos_schedules              | currrent count of Schedule                             | GaugeVec     | namespace                              | /                            |
 | chaos_controller_manager_chaos_workflows              | currrent count of Workflow                             | GuageVec     | namespace                              | /                            |
 | chaos_controller_manager_emitted_event_total          | count of the emitted event by chaos-controller-manager | CounterVec   | type, reason, namespace                | /                            |
