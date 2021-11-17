@@ -86,6 +86,12 @@ cd packages/mui-extends
 npm init
 ```
 
+> Note:
+>
+> Some commands will be changed, like:
+>
+> - `yarn start:default` -> `yarn workspace @ui/app start:default`
+
 ## Drawbacks
 
 A good explanation:
