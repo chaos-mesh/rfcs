@@ -29,7 +29,7 @@ to testing and management.
 
 Before monorepo, the codebase looks like this:
 
-```text
+```shell
 ui/
 ├── src/
 │   ├── api/
@@ -44,14 +44,14 @@ After using monorepo:
 
 ```shell
 ui/
-├── packages/
-│   ├── mui-extends/ # components-mui
-│   ├── crd/ # generate ts code from CRDs
 ├── app/ # original src
 │   ├── api/
 │   ├── components/
 │   ├── lib/
 │   ├── pages/
+├── packages/
+│   ├── mui-extends/ # components-mui
+│   ├── crd/ # generate ts code from CRDs
 ├── package.json
 ```
 
