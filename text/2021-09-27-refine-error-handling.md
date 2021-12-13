@@ -36,11 +36,14 @@ When returning errors, consider the following to determine the best choice:
    ```
 
    Then the user will be able to use `errors.As` to extract the `ErrNotFound`
-   error, and get the `File` field.
+   error, and get the `File` field. However, you should think **carefully**
+   whether this field is necessary for the caller to handle the error. In former
+   example, including the `File` in the error is really a **bad** case:
 
-   A new pub type of an error should be created carefully, if you don't think the
-   field will be useful for error handling, you should not create a new type, and a
-   simple error variable with wrap is prefered, e.g.
+   1. The caller actually know the file. It doesn't provide more information.
+   2. The caller don't need to know the file to handle the error in most cases.
+
+   In this case, a simple error variable with wrap is prefered, e.g.
 
    ```go
    var ErrNotFound = errors.New("not found")
@@ -68,7 +71,23 @@ When returning errors, consider the following to determine the best choice:
    }
    ```
 
-3. Is this an error which will not be detected but appears in a lot of
+3. Combine of rule 1 and rule 2. The context information is needed by the
+   caller, but it's also widely used by multiple functions. The variable name
+   could be more detailed than the type.
+
+   Example:
+   
+   ```go
+   type ContainerRuntimeClientConnectErr struct {
+      ContainerRuntime string
+   }
+
+   var DockerConnectErr = ContainerRuntimeClientConnectErr {
+      ContainerRuntime: "docker"
+   }
+   ```
+
+4. Is this an error which will not be detected but appears in a lot of
    functions? If so, you should use a global private variable, and wrap it with
    `errors.WithStack`. If you want to share the same error (like `Not Found`) in
    multiple packages, but the callers will never need to detect the `Not Found`,
@@ -78,7 +97,7 @@ When returning errors, consider the following to determine the best choice:
    var errNotFound = errors.New("not found")
    ```
 
-4. Is this really a simple error that will not appear in other functions? If so,
+5. Is this really a simple error that will not appear in other functions? If so,
    you should use an inline `errors.New`. The `errors.New` in `pkg/errors` is
    already equipped with a stack backtrace, so you don't need to add it again.
 
@@ -90,12 +109,12 @@ When returning errors, consider the following to determine the best choice:
    }
    ```
 
-5. Are you propagating an error returned by other functions? If it's returned by
+6. Are you propagating an error returned by other functions? If it's returned by
    function inside the Chaos Mesh, we could assume this error is already
    equipped with a stack backtrace, so there is not need to call
-   `errors.WithStack`. However, if it's returned by other libraries, it would be
-   better to call `errors.WithStack` to equip it with a stack backtrace. For
-   more information, see the section on error wrapping.
+   `errors.WithStack`. However, if it's returned by other libraries, it should
+   to call `errors.WithStack` to equip it with a stack backtrace. For more
+   information, see the section on error wrapping.
 
    ```go
    func startProcess(cmd *exec.Cmd) error {
@@ -110,10 +129,20 @@ When returning errors, consider the following to determine the best choice:
 
 ### Error Wrapping
 
-* Return the original error if there is no additional context to add
+* Return the original error if there is no additional context to add. If the
+  original error is not equipped with a stack, return with `errors.WithStack`.
 * Add context using
   [`"pkg/errors".Wrap`](https://pkg.go.dev/github.com/pkg/errors#Wrap) so that
   the error message provides more context
+
+   ```go
+   var ErrNotFound = errors.New("not found")
+
+   func open(file string) error {
+      return errors.Wrapf(ErrNotFound, "open file %s", file)
+   }
+   ```
+
 * Use [`"pkg/errors".Errorf`](https://pkg.go.dev/github.com/pkg/errors#Errorf)
   with if the callers do not need to detect or handle that specific error case.
 
@@ -138,7 +167,7 @@ A more realistic example in `chaos-daemon` is:
 
 ```go
 func (s *DaemonServer) ExecStressors(ctx context.Context,
-    req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+   req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
    ...
 
    control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
@@ -193,17 +222,44 @@ target error is a variable (created by `errors.New`, in most situation), you
 could use `errors.Is`.
 
 The `error` type of golang is really a chaos, a type and a varaible can both
-mean a kind of error, and you should treat them in different pattern. To make
-the thing simpler, you should **never** use `errors.Is` to identify a customized
-error type (other than the variable created by `errors.New`). It's prefered to
-use `errors.As` and then judge the equality (unless your error is recursively
-wrapped, which is not common, right?)
+mean a kind of error, and you should treat them in different pattern. If it's a
+customized error type, it could be verified through `errors.As`.
+
+Example:
+
+```go
+type ContainerRuntimeClientConnectErr struct {
+   ContainerRuntime string
+}
+
+var crccErr ContainerRuntimeClientConnectErr
+if errors.As(err, &crccErr) {
+   fmt.Println(crccErr.ContainerRuntime)
+}
+```
+
+If this kind of error is a variable, it could be checked through `errors.Is`:
+
+Example:
+
+```go
+var DockerConnectErr = ContainerRuntimeClientConnectErr {
+   ContainerRuntime: "docker"
+}
+
+if errors.Is(err, DockerConnectErr) {
+   fmt.Println("Docker Connect Error!")
+}
+```
+
+If this kind of error is not exported (e.g. an inline error or unexported
+variable/type), and you really need to detect it, please modify the callee
+function to export the error.
 
 #### Handling Error from Kubernetes
 
 The error from kubernetes client is usually derived from an HTTP status. The
-only way to identify them is to use `k8sError.Is*`, e.g.
-`k8sError.IsNotFound`.
+only way to identify them is to use `k8sError.Is*`, e.g. `k8sError.IsNotFound`.
 
 #### Handling Error from Grpc
 
@@ -233,7 +289,8 @@ a simple representation of error event.
 
 #### Inside a grpc function implementation
 
-Make sure the error is printed in the log.
+Make sure the error is printed in the log, with the stack information (which is
+the default behavior for the zapr error log).
 
 1. If the error needn't to be identified by the client, you could simply return
    it (and it will become an `Unknown Error` with the `err.Error()` as message).
@@ -267,8 +324,66 @@ It would also be suggested to define a variable to represent the error message
 const ErrNotFound = "grpc/status".Error(code.NotFound, ErrNotFoundMsg)
 ```
 
-This error should only be directly returned to grpc client, but not to the
-function inside, as this error doesn't have any stack information.
+However, inside the chaos-daemon, the error still passes like the normal go
+error, which means you need to do some convert at the **end** of the execution.
+For example:
+
+```go
+// Error generation
+package crclients
+
+var ContainerNotFound = errors.New("container not found")
+
+func ContainerKill(containerId string) err {
+   return errors.Wrapf(ContainerNotFound, "not found id: %d", containerId)
+}
+
+// Convert error to which is suitable for grpc
+package errors
+
+const ErrContainerNotFound = "grpc/status".Error(code.NotFound, ContainerNotFound.String())
+func IsContainerNotFound(err error) bool {
+   if grpcError, ok := err.(status.Error); ok {
+      status := grpcError.GRPCStatus()
+      return status.Code() == code.NotFound && status.Message() == ContainerNotFound.String()
+   }
+   return false
+}
+
+package chaosdaemon
+
+func (s *DaemonServer) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
+   err := ContainerKill(req.ContainerId)
+
+   if errors.Is(err, crclients.ContainerNotFound) {
+      // this log is necessary to keep the stack trace, as the stack trace and all additional information
+      // will lost when returning to the grpc caller.
+      log.Error(err, "kill container")
+      return nil, chaosdaemonErr.ErrContainerNotFound
+   }
+}
+```
+
+Then the client ("chaos-controller-manager") can check this error with the help
+of `IsContainerNotFound`:
+
+```go
+_, err := pbClient.ContainerKill(ctx, &pb.ContainerRequest{
+   Action: &pb.ContainerAction{
+      Action: pb.ContainerAction_KILL,
+   },
+   ContainerId: containerId,
+})
+
+if chaosdaemonErr.IsContainerNotFound(err) {
+   fmt.Println("It's container not found!")
+}
+```
+
+It's inconvenient to extract any information from the error, as it's just a
+string (and an error code), which is only enough to assert the "kind". However,
+it's enough for current Chaos Mesh codebase (but I don't know whether we will
+need to find ways to extract information in the future).
 
 ### Print
 
