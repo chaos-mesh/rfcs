@@ -22,17 +22,74 @@ When returning errors, consider the following to determine the best choice:
 1. Does the client need to extract the information of error? If so, you should
    use a custom type, and implement `Error()` method. You should also wrap it
    with `errors.WithStack` to make sure it has a backtrace.
+
+   Example:
+
+   ```go
+   type ErrNotFound struct {
+      File string
+   }
+
+   func open(file string) error {
+      return errors.WithStack(ErrNotFound{file: file})
+   }
+   ```
+
+   Then the user will be able to use `errors.As` to extract the `ErrNotFound`
+   error, and get the `File` field.
+
+   A new pub type of an error should be created carefully, if you don't think the
+   field will be useful for error handling, you should not create a new type, and a
+   simple error variable with wrap is prefered, e.g.
+
+   ```go
+   var ErrNotFound = errors.New("not found")
+
+   func open(file string) error {
+      return errors.Wrapf(ErrNotFound, "open file %s", file)
+   }
+   ```
+
 2. Is it an error which needs to be detected? If so, you should use a global
    public variable to store the error, and wrap it with `errors.WithStack` when
    returning the error.
+
+   Example:
+
+   ```go
+   var (
+      ErrPodNotFound = errors.New("pod not found")
+
+      ErrPodNotRunning = errors.New("pod not running")
+   )
+
+   func handle() error {
+      return errors.WithStack(ErrPodNotFound)
+   }
+   ```
+
 3. Is this an error which will not be detected but appears in a lot of
    functions? If so, you should use a global private variable, and wrap it with
    `errors.WithStack`. If you want to share the same error (like `Not Found`) in
    multiple packages, but the callers will never need to detect the `Not Found`,
    please create a new `notFound` error under every package.
+
+   ```go
+   var errNotFound = errors.New("not found")
+   ```
+
 4. Is this really a simple error that will not appear in other functions? If so,
    you should use an inline `errors.New`. The `errors.New` in `pkg/errors` is
    already equipped with a stack backtrace, so you don't need to add it again.
+
+   Example:
+
+   ```go
+   func open(file string) error {
+      return errors.New("not found")
+   }
+   ```
+
 5. Are you propagating an error returned by other functions? If it's returned by
    function inside the Chaos Mesh, we could assume this error is already
    equipped with a stack backtrace, so there is not need to call
@@ -40,69 +97,16 @@ When returning errors, consider the following to determine the best choice:
    better to call `errors.WithStack` to equip it with a stack backtrace. For
    more information, see the section on error wrapping.
 
-#### Example 1
+   ```go
+   func startProcess(cmd *exec.Cmd) error {
+      err := cmd.Start()
+      if err != nil {
+         return nil, errors.WithStack(err)
+      }
 
-```go
-type ErrNotFound struct {
-   File string
-}
-
-func open(file string) error {
-   return errors.WithStack(ErrNotFound{file: file})
-}
-```
-
-Then the user will be able to use `errors.As` to extract the `ErrNotFound`
-error, and get the `File` field.
-
-A new pub type of an error should be created carefully, if you don't think the
-field will be useful for error handling, you should not create a new type, and a
-simple error variable with wrap is prefered, e.g.
-
-```go
-var ErrNotFound = errors.New("not found")
-
-func open(file string) error {
-   return errors.Wrapf(ErrNotFound, "open file %s", file)
-}
-```
-
-#### Example 2
-
-```go
-var (
-   ErrPodNotFound = errors.New("pod not found")
-
-   ErrPodNotRunning = errors.New("pod not running")
-)
-```
-
-#### Example 3
-
-```go
-var errNotFound = errors.New("not found")
-```
-
-#### Example 4
-
-```go
-func open(file string) error {
-   return errors.New("not found")
-}
-```
-
-#### Example 5
-
-```go
-func startProcess(cmd *exec.Cmd) error {
-   err := cmd.Start()
-   if err != nil {
-      return nil, errors.WithStack(err)
+      return nil
    }
-
-   return nil
-}
-```
+   ```
 
 ### Error Wrapping
 
