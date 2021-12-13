@@ -98,14 +98,8 @@ What the **Build Script** should do:
 2. Build final and middle targets, like an image, a binary or generating files.
 3. Manage the build cache. Every building should leave some cache to accelerate
    the next building.
-4. **Define and check the depencency relationship**. It has to be done by the
-   build script, because all artifacts of `Makefile` are files, which means it
-   knows nothing about the docker image. However, it's quite common to depend on
-   and image.
-
-   The Chaos Mesh uses `.dockerbuilt` file to represent the image has been
-   built. However, it doesn't work well when the user switch the target
-   IMAGE_TAG, REGISTRY ...
+4. **Define and check some of the depencency relationship**. The `Makefile` can
+   only handle the file dependency, but we also need to handle the docker image.
 5. **Manage different kinds of building**. Some dependencies needs to be built
    directly, some need to be downloaded, while some others need `docker pull`.
 6. Some helper script to upload images to specific registry.
@@ -118,6 +112,7 @@ What the **Makefile** should do:
 
 1. Provide a convinient entrance to the build script. For example: `make
    image-chaos-mesh`, `make images/chaos-mesh/bin/chaos-controller-manager`...
+2. Define and check some of the depencency relationship.
 
 What the **Dockerfile** should do:
 
@@ -147,8 +142,7 @@ Makefile:
      cluster, and will **not** install the chaos mesh. There are two flags:
      `E2E_TEST_CREATE_CLUSTER` and `E2E_TEST_INSTALL_CHAOS_MESH` to controll
      the corresponding behavior.
-2. **Every** targets of `Makefile` is `.PHONY`, because the dependency will be
-   controlled by the build scripts.
+2. **Every** targets of `Makefile` is `.PHONY`.
 
 
 Dockerfile:
@@ -176,58 +170,32 @@ Every targets in the build scripts will have following functions:
 
 Here are some examples of one "target" and their behavior in the build script:
 
-1. `./cmd/controller-manager/main/go`:
-   - The modified time can be got from the file stats.
-   - It will run nothing.
-   - It doesn't have any help message.
-2. `image-build-env`:
+1. `image-build-env`:
    - The modified time can be got from the `docker` command.
    - The build script should compare the modified time of this image with the
      modified time of files under `images/build-env`. If the `Dockerfile` is
      newer, it will download the image from the registry.
-3. `image-chaos-mesh`:
+2. `image-chaos-mesh`:
    - The modified time can be got from the `docker` command.
    - The build script will build the dependent binaries automatically. Then it
      will compare the modified time of its dependencies and itself to decide
      whether it should be rebuilt.
-4. `images/chaos-mesh/bin/chaos-controller-manager`:
+3. `images/chaos-mesh/bin/chaos-controller-manager`:
    - The modified time can be got from the file stats;
    - It will enter the `build-env` and run `go build` to build the binary.
-5. `test`:
+4. `test`:
    - Nothing should get its modified time.
    - It will enter the `dev-env` and run `go test` to run the test.
 
 ### Technical Implementation
 
 In 2021, we can assume that the machine of every developer should have installed
-the `python`, so we can use `python` to implement the build script. Targets with
-different building behaviors can be concluded into different classes:
-
-- `BaseTarget`: it will provide helper functions to verify and construct the
-  dependencies, which is nearly needed by all targets.
-   - `DockerImageTarget`: it will provides methods to get the modified time of
-     the image, and to build the image.
-   - `FileTarget`: it will provide method to get the modified time of a file.
-      - `GoBuildTarget`: it will provide method to get the modified time of the
-      binary and to build the binary.
-      - ... Some other targets to represent the generated files.
-- `CollectionTarget`: like the `image` target, it will build all targets inside.
-   It will **not** provide or verify the modification time, because the targets
-   inside will handle the dependencies well.
-
-Then we also need some helpers to execute commands and redirect the output.
-
-- `ImageRunner`: it will run a command in the docker image.
-- `RawCommandRunner`: it will run a command directly.
-
-These command runners should accept some arguments (or env variables) to decide
-whether to run in dry-run mode.
+the `python`, so we can use `python` to implement the build script.
 
 ## Imagination
 
-- If the `Makefile` targets are only an entry point to the build script, can it
-  be generated directly from the build script?
-- Is `python` a good choice? Is our building environment having a updated `python`?
+- Is `python` a good choice? Is our building environment having an updated
+  `python`?
 - I have considered `google/tx` and `bash` script as an alternative to `python`.
   From the personal feeling, I prefer nodejs (with `google/tx`), and it has much
   better performance than `python` (considering we may need to read a lot of
