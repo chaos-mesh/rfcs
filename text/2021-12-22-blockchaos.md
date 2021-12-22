@@ -7,11 +7,13 @@ inject delay / corrupt into the request. This solution can have its own
 advantages. Meanwhile, the disadvantages also bothers us a lot.
 
 Advantages:
+
 1. It will never have chance to break the host system, and is relatively safe.
 2. Have knowledge about the file system, which means it can filter through path,
    owner, or anything which only occurs upon the file system.
 
 Disadvantages:
+
 1. The performance impact is really big even without injecting any delay, which
    makes it impossible to do quantitative analysis.
 2. The target process will be paused at the beginning of the injecting. The time
@@ -88,7 +90,7 @@ chaos-daemon.
 The chaos daemon can use the go client provided by chaos-driver directly.
 
 Before injecting the chaos, the chaos daemon should make sure the `chaos_driver`
-module has been loaded. 
+module has been loaded.
 
 #### Get device from path
 
