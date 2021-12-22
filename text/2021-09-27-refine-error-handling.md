@@ -76,7 +76,7 @@ When returning errors, consider the following to determine the best choice:
    could be more detailed than the type.
 
    Example:
-   
+
    ```go
    type ContainerRuntimeClientConnectErr struct {
       ContainerRuntime string
