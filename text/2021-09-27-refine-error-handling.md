@@ -261,11 +261,29 @@ function to export the error.
 The error from kubernetes client is usually derived from an HTTP status. The
 only way to identify them is to use `k8sError.Is*`, e.g. `k8sError.IsNotFound`.
 
+Wrapping an error in the Kubernetes is fine, as the `k8sError.Is*` will finally
+use `errors.As` to extract the information from the error.
+
 #### Handling Error from Grpc
 
 The error returned from grpc call is also too simple, and will lose the
 hierarchy error stack. The only way to identify an error returned from the grpc
-call is to use the `IsXXX` provided by the callee.
+call is to use the `IsXXX` provided by the callee. For example:
+
+```go
+_, err = pbClient.RecoverTimeOffset(ctx, &pb.TimeRequest{
+   ContainerId: containerId,
+})
+if err != nil {
+   if chaosdaemonerr.IsContainerNotFound(err) {
+      // ignore the container not found error
+      return v1alpha1.NotInjected, nil
+   }
+   return v1alpha1.Injected, errors.WithStack(err)
+}
+```
+
+Wrapping an error from grpc is also fine,
 
 ### The End of Error
 
@@ -305,18 +323,30 @@ A template implementation for `IsXXX` could be:
 package error
 
 import (
+   "github.com/pkg/errors"
+
    "google.golang.org/grpc/status"
    "google.golang.org/grpc/code"
 )
 
+type StatError interface {
+   error
+   GRPCStatus() *Status
+}
+
 func IsNotFound(err error) bool {
-   if grpcError, ok := err.(status.Error); ok {
+   if grpcError := StatError(nil); errors.As(err, &grpcError) {
       status := grpcError.GRPCStatus()
       return status.Code() == code.NotFound && status.Message() == ErrNotFoundMsg
    }
    return false
 }
 ```
+
+Adding a customized interface `StatError` is required, as it's not provided by
+the `grpc/status` package. Here is a feature request
+[issue](https://github.com/grpc/grpc-go/issues/2934#issuecomment-624749630) for
+this.
 
 It would also be suggested to define a variable to represent the error message
 
