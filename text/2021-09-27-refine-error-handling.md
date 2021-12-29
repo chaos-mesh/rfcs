@@ -429,7 +429,8 @@ Every error types have been defined in the
 `/pkg/dashboard/apiserver/utils/error.go`, with a comment for the status code.
 If you need to return an error, please choose one from them, and send them
 through
-`"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils".SetAPIError`. For example:
+`"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils".SetAPIError`.
+For example:
 
 ```go
 utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
