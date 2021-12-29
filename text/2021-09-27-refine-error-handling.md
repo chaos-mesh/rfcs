@@ -284,7 +284,8 @@ if err != nil {
 }
 ```
 
-Wrapping an error from grpc is also fine,
+Wrapping an error from grpc is also fine, the `IsContainerNotFound` function
+should handle the situation where this error is `Wrap`ed multiple times.
 
 ### The End of Error
 
@@ -372,9 +373,15 @@ func ContainerKill(containerId string) err {
 // Convert error to which is suitable for grpc
 package errors
 
+type StatError interface {
+   error
+   GRPCStatus() *Status
+}
+
 const ErrContainerNotFound = "grpc/status".Error(code.NotFound, ContainerNotFound.String())
+
 func IsContainerNotFound(err error) bool {
-   if grpcError, ok := err.(status.Error); ok {
+   if grpcError := StatError(nil); errors.As(err, &grpcError) {
       status := grpcError.GRPCStatus()
       return status.Code() == code.NotFound && status.Message() == ContainerNotFound.String()
    }
@@ -415,6 +422,30 @@ It's inconvenient to extract any information from the error, as it's just a
 string (and an error code), which is only enough to assert the "kind". However,
 it's enough for current Chaos Mesh codebase (but I don't know whether we will
 need to find ways to extract information in the future).
+
+#### Inside the dashboard apiserver
+
+Every error types have been defined in the
+`/pkg/dashboard/apiserver/utils/error.go`, with a comment for the status code.
+If you need to return an error, please choose one from them, and send them
+through
+`"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils".SetAPIError`. For example:
+
+```go
+utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+```
+
+The `c` is the `gin.Context`. After set the error, this request will be returned
+a json error message:
+
+```json
+{
+   "code": code,
+   "type": typeName,
+   "message": err.Error(),
+   "full_text": fmt.Sprintf("%+v", err)
+}
+```
 
 ### Print
 
