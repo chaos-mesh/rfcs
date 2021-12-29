@@ -146,7 +146,8 @@ When returning errors, consider the following to determine the best choice:
 * Use [`"pkg/errors".Errorf`](https://pkg.go.dev/github.com/pkg/errors#Errorf)
   with if the callers do not need to detect or handle that specific error case.
 
-The [`"pkg/errors".Wrap`](https://pkg.go.dev/github.com/pkg/errors#Wrap) will
+The [`"pkg/errors".Wrap`](https://pkg.go.dev/github.com/pkg/errors#Wrap) and
+[`"pkg/errors".Errorf`](https://pkg.go.dev/github.com/pkg/errors#Errorf) will
 add a stack trace, so you don't need to wrap it with `WithStack` again.
 
 The context usually includes: what you are doing, the object of the operation
@@ -156,7 +157,7 @@ The context usually includes: what you are doing, the object of the operation
 func startProcess(cmd *exec.Cmd) error {
    err := cmd.Start()
    if err != nil {
-      return nil, errors.Errorf("start process: %v", err)
+      return nil, errors.Errorf("start process: %w", err)
    }
 
    return nil
@@ -191,8 +192,8 @@ percolates up through the stack:
 ```go
 s, err := store.New()
 if err != nil {
-   return fmt.Errorf(
-      "failed to create new store: %v", err)
+   return errors.Errorf(
+      "failed to create new store: %w", err)
 }
 ```
 
@@ -201,8 +202,8 @@ if err != nil {
 ```go
 s, err := store.New()
 if err != nil {
-   return fmt.Errorf(
-      "new store: %v", err)
+   return errors.Errorf(
+      "new store: %w", err)
 }
 ```
 
