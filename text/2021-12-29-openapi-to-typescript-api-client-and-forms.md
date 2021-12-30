@@ -293,7 +293,7 @@ But this is not an ideal result and there are still some details that need to be
 addressed, like:
 
 - Some useless markers remain in the `helperText`.
-- If an action only use shared fields, the spread operator will be useless.
+- If an action only use shared fields, the spread operator will be excess.
 - Output components directly? (enhancement)
 
 These can be followed up as optimization matters.
