@@ -154,11 +154,11 @@ can also define markers.
 
 So the following are all markers we will using:
 
-- ui:form:enum:action1,action2,action3
+- ui:form:enum=action1;action2;action3
 
   > Indicate what actions we have.
 
-- ui:form:action:action1
+- ui:form:action=action1
 
   > Indicate this property belongs to which action.
 
