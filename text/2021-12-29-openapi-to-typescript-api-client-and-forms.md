@@ -15,9 +15,9 @@ You can find these **extra** type definitions in https://github.com/chaos-mesh/c
 
 This leads to several problems:
 
-- The front-end needs to be manually synchronized when there is an update to the
-  type definition.
-- As `1` continues to emerge, there are more and more things to maintain manually.
+1. The front-end needs to be manually synchronized when there is an update to the
+   type definition.
+2. As `1` continues to emerge, there are more and more things to maintain manually.
 
 Considering our existing maintenance cost and past experience, we are not able
 to synchronize the corresponding descriptions to the front-end in a timely manner.
