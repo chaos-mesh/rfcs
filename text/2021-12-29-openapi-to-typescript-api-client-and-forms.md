@@ -100,7 +100,7 @@ Convert to a JSON:
   "field": "text",
   "label": "Name",
   "value": "",
-  "helperText": "Fill your name",
+  "helperText": "Fill your name"
 }
 ```
 
@@ -171,9 +171,11 @@ can also define markers.
 
 So the following are all markers we will using:
 
-- ui:form:enum=action1;action2;action3
+- +kubebuilder:validation:Enum=action1;action2;action3
 
-  > Indicate what actions we have.
+  > Reuse the kubebuilder validation marker to indicate what actions we have.
+  >
+  > Except for the `action`, this can also reuse to define a `select` field.
 
 - ui:form:action=action1
 
@@ -435,8 +437,32 @@ addressed, like:
 - ~~Some useless markers remain in the `helperText`.~~
 - ~~If an action only uses shared fields, the spread operator will be excess.~~
 - Output components directly? (enhancement)
+- $ref siblings aren't supported in OpenAPI v2
 
-These can be followed up as optimization matters.
+  For example:
+
+  ```yaml
+  attr:
+    $ref: "#/definitions/v1alpha1.AttrOverrideSpec"
+    description: |-
+      Attr defines the overrided attribution
+      ui:form:action=attrOverride
+      +optional
+    type: object
+  ```
+
+  The above definitions will convert to:
+
+  ```ts
+  /**
+  *
+  * @type {V1alpha1AttrOverrideSpec}
+  * @memberof V1alpha1IOChaosSpec
+  */
+  attr?: V1alpha1AttrOverrideSpec
+  ```
+
+  The `description` will be lost.
 
 ## Drawbacks
 
