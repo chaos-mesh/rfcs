@@ -56,9 +56,20 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 }
 ```
 
-Then the chaos daemon can send command through this this connection. **Make sure
-that every LISTENING sockets are closed after the command has started, or the
-parent will be blocked by dialing dead children**.
+Then the chaos daemon can send command by dialing this abstract socket:
+
+```go
+httpc := http.Client{
+    Transport: &http.Transport{
+        DialContext: func(_ context.Context, _, _ string) (net.Conn, error) {
+            return net.Dial("unix", fmt.Sprintf("@chaos-daemon-%s", *b.identifier))
+        },
+    },
+}
+```
+
+ **Make sure that every LISTENING sockets are closed after the command has
+started, or the parent will be blocked by dialing dead children**.
 
 If every listening fd is closed, further request will get an error: `dial unix
 @xxxx: connect: connection refused`.
