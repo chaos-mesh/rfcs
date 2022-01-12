@@ -68,6 +68,11 @@ httpc := http.Client{
 }
 ```
 
+The name of the abstract unix socket is `@chaos-daemon-{b.identifier}`, which
+means communicating is only avaiable for process with an identifier. I think
+it's acceptable. As as alternative, we can generate an UUID as the name for
+every process, but I prefer the identifier (for the convenience of debug)
+
  **Make sure that every LISTENING sockets are closed after the command has
 started, or the parent will be blocked by dialing dead children**.
 
