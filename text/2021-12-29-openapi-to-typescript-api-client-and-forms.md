@@ -85,7 +85,8 @@ To generate forms, we have think about these things before we write the code:
 - How to find shared fields?
 - How to use the generated schemas to construct the interface?
 
-For the first item, a form field should normally contain at least:
+For the first item, a frontend form field component should normally contains properties
+at least:
 
 - type
 - label
@@ -96,7 +97,7 @@ Convert to a JSON:
 
 ```json
 {
-  "field: "text",
+  "field": "text",
   "label": "Name",
   "value": "",
   "helperText": "Fill your name",
