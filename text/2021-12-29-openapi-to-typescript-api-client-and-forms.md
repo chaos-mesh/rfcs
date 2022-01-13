@@ -173,13 +173,18 @@ So the following are all markers we will using:
 
 - +kubebuilder:validation:Enum=action1;action2;action3
 
+  ui:form:enum=action1;action2;action3
+
   > Reuse the kubebuilder validation marker to indicate what actions we have.
+  > For uniformity, you can also write as `ui:form:enum`.
   >
   > Except for the `action`, this can also reuse to define a `select` field.
 
-- ui:form:action=action1
+- ui:form:when=action=='action1'
 
   > Indicate this property belongs to which action.
+  >
+  > The value is an `expression` which needs to be evaluated at runtime.
 
 - ui:form:ignore
 
@@ -189,7 +194,7 @@ For example:
 
 ```go
 type AWSChaosSpec struct {
-        // ui:form:enum:ec2-stop,ec2-restart,detach-volume
+        // ui:form:enum=ec2-stop;ec2-restart;detach-volume
         // +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume
         Action AWSChaosAction `json:"action"`
 
@@ -205,7 +210,7 @@ type AWSSelector struct {
         //...
 
         // DeviceName indicates the name of the device.
-        // ui:form:action:detach-volume
+        // ui:form:when=action=='detach-volume'
         // +optional
         DeviceName *string `json:"deviceName,omitempty" webhook:"AWSDeviceName,nilable"`
 }
@@ -215,7 +220,8 @@ The rest of the steps are simple, use regular expressions to read them:
 
 ```js
 // Part of the code
-const UI_FORM_ENUM = /ui:form:enum:(.+)\s/;
+const UI_FORM_ENUM = /ui:form:enum=(.+)\s/;
+const KUBEBUILDER_VALIDATION_ENUM = /\+kubebuilder:validation:Enum=(.+)\s/;
 
 /**
  * Get enum array from jsdoc comment.
@@ -225,9 +231,9 @@ const UI_FORM_ENUM = /ui:form:enum:(.+)\s/;
  * @return {string[]}
  */
 export function getUIFormEnum(s) {
-  const matched = s.match(UI_FORM_ENUM);
+  let matched = s.match(UI_FORM_ENUM) || s.match(KUBEBUILDER_VALIDATION_ENUM);
 
-  return matched ? matched[1].split(",") : [];
+  return matched ? matched[1].split(";") : [];
 }
 
 // ...
@@ -249,7 +255,7 @@ Similarly we can handle other markers in this way. So far we have solved this pr
 Now this problem also becomes simple, since we have defined markers, we can default
 to:
 
-**The fields without `ui:form:action:xxx` and `ui:form:ignore` are shared**.
+**The fields without `ui:form:when=action=='xxx'` and `ui:form:ignore` are shared**.
 
 I think this part can be ignored for code details, it is enough to understand this
 given condition.
@@ -259,7 +265,7 @@ given condition.
 Here is another case, what if a chaos doesn't have an action? Like `KernelChaos`
 and `TimeChaos`.
 
-This Chaos will output `export default shared` directly.
+This Chaos will output an empty actions array `export const actions = []` as a placeholder.
 
 #### Non-primitive type
 
@@ -323,38 +329,33 @@ Finally, we will generate `AWSChaos` like this:
  * Do not make direct changes to the file.
  */
 
-const shared = [
-  {
-    field: "text",
-    label: "awsRegion",
-    value: "",
-    helperText: "AWSRegion defines the region of aws.",
-  },
-  {
-    field: "text",
-    label: "ec2Instance",
-    value: "",
-    helperText: "Ec2Instance indicates the ID of the ec2 instance.",
-  },
-  {
-    field: "text",
-    label: "secretName",
-    value: "",
-    helperText: "Optional. SecretName defines the name of kubernetes secret.",
-  },
-];
-
-export default {
-  "ec2-stop": shared,
-  "ec2-restart": shared,
-  "detach-volume": [
-    ...shared,
+export const actions = [],
+  data = [
+    {
+      field: "text",
+      label: "awsRegion",
+      value: "",
+      helperText: "AWSRegion defines the region of aws.",
+    },
     {
       field: "text",
       label: "deviceName",
       value: "",
       helperText:
         "Optional. DeviceName indicates the name of the device. Needed in detach-volume.",
+      when: "action=='detach-volume'",
+    },
+    {
+      field: "text",
+      label: "ec2Instance",
+      value: "",
+      helperText: "Ec2Instance indicates the ID of the ec2 instance.",
+    },
+    {
+      field: "text",
+      label: "secretName",
+      value: "",
+      helperText: "Optional. SecretName defines the name of kubernetes secret.",
     },
     {
       field: "text",
@@ -362,71 +363,72 @@ export default {
       value: "",
       helperText:
         "Optional. EbsVolume indicates the ID of the EBS volume. Needed in detach-volume.",
+      when: "action=='detach-volume'",
     },
-  ],
-};
+  ];
 ```
 
 Also `KernelChaos`:
 
 ```ts
-const shared = [
-  {
-    field: "ref",
-    label: "failKernRequest",
-    children: [
-      {
-        field: "ref",
-        label: "callchain",
-        multiple: true,
-        children: [
-          {
-            field: "text",
-            label: "funcname",
-            value: "",
-            helperText: "xxx",
-          },
-          {
-            field: "text",
-            label: "parameters",
-            value: "",
-            helperText: "xxx",
-          },
-          {
-            field: "text",
-            label: "predicate",
-            value: "",
-            helperText: "xxx",
-          },
-        ],
-      },
-      {
-        field: "text",
-        label: "failtype",
-        value: 0,
-        helperText: "xxx",
-      },
-      {
-        field: "label",
-        label: "headers",
-        value: [],
-        helperText: "xxx",
-      },
-      {
-        field: "text",
-        label: "probability",
-        value: 0,
-        helperText: "xxx",
-      },
-      {
-        field: "text",
-        label: "times",
-        value: 0,
-        helperText: "xxx",
-      },
-    ],
-  },
-];
+export const actions = [],
+  data = [
+    {
+      field: "ref",
+      label: "failKernRequest",
+      children: [
+        {
+          field: "ref",
+          label: "callchain",
+          multiple: true,
+          children: [
+            {
+              field: "text",
+              label: "funcname",
+              value: "",
+              helperText: "xxx",
+            },
+            {
+              field: "text",
+              label: "parameters",
+              value: "",
+              helperText: "xxx",
+            },
+            {
+              field: "text",
+              label: "predicate",
+              value: "",
+              helperText: "xxx",
+            },
+          ],
+        },
+        {
+          field: "text",
+          label: "failtype",
+          value: 0,
+          helperText: "xxx",
+        },
+        {
+          field: "label",
+          label: "headers",
+          value: [],
+          helperText: "xxx",
+        },
+        {
+          field: "text",
+          label: "probability",
+          value: 0,
+          helperText: "xxx",
+        },
+        {
+          field: "text",
+          label: "times",
+          value: 0,
+          helperText: "xxx",
+        },
+      ],
+    },
+  ];
 
 export default shared;
 ```
@@ -446,7 +448,7 @@ addressed, like:
     $ref: "#/definitions/v1alpha1.AttrOverrideSpec"
     description: |-
       Attr defines the overrided attribution
-      ui:form:action=attrOverride
+      ui:form:when=action=='attrOverride'
       +optional
     type: object
   ```
