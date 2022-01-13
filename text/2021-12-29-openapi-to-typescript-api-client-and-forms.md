@@ -173,20 +173,20 @@ So the following are all markers we will using:
 
 - +kubebuilder:validation:Enum=action1;action2;action3
 
-  ui:form:enum=action1;action2;action3
+  +ui:form:enum=action1;action2;action3
 
   > Reuse the kubebuilder validation marker to indicate what actions we have.
-  > For uniformity, you can also write as `ui:form:enum`.
+  > For uniformity, you can also write as `+ui:form:enum`.
   >
   > Except for the `action`, this can also reuse to define a `select` field.
 
-- ui:form:when=action=='action1'
+- +ui:form:when=action=='action1'
 
   > Indicate this property belongs to which action.
   >
   > The value is an `expression` which needs to be evaluated at runtime.
 
-- ui:form:ignore
+- +ui:form:ignore
 
   > Ignore this property.
 
@@ -194,7 +194,7 @@ For example:
 
 ```go
 type AWSChaosSpec struct {
-        // ui:form:enum=ec2-stop;ec2-restart;detach-volume
+        // +ui:form:enum=ec2-stop;ec2-restart;detach-volume
         // +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume
         Action AWSChaosAction `json:"action"`
 
@@ -203,14 +203,14 @@ type AWSChaosSpec struct {
 
 type AWSSelector struct {
         // Endpoint indicates the endpoint of the aws server. Just used it in test now.
-        // ui:form:ignore
+        // +ui:form:ignore
         // +optional
         Endpoint *string `json:"endpoint,omitempty"`
 
         //...
 
         // DeviceName indicates the name of the device.
-        // ui:form:when=action=='detach-volume'
+        // +ui:form:when=action=='detach-volume'
         // +optional
         DeviceName *string `json:"deviceName,omitempty" webhook:"AWSDeviceName,nilable"`
 }
@@ -220,7 +220,7 @@ The rest of the steps are simple, use regular expressions to read them:
 
 ```js
 // Part of the code
-const UI_FORM_ENUM = /ui:form:enum=(.+)\s/;
+const UI_FORM_ENUM = /\+ui:form:enum=(.+)\s/;
 const KUBEBUILDER_VALIDATION_ENUM = /\+kubebuilder:validation:Enum=(.+)\s/;
 
 /**
@@ -255,7 +255,7 @@ Similarly we can handle other markers in this way. So far we have solved this pr
 Now this problem also becomes simple, since we have defined markers, we can default
 to:
 
-**The fields without `ui:form:when=action=='xxx'` and `ui:form:ignore` are shared**.
+**The fields without `+ui:form:when=action=='xxx'` and `+ui:form:ignore` are shared**.
 
 I think this part can be ignored for code details, it is enough to understand this
 given condition.
@@ -448,7 +448,7 @@ addressed, like:
     $ref: "#/definitions/v1alpha1.AttrOverrideSpec"
     description: |-
       Attr defines the overrided attribution
-      ui:form:when=action=='attrOverride'
+      +ui:form:when=action=='attrOverride'
       +optional
     type: object
   ```
