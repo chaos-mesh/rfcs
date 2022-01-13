@@ -97,14 +97,14 @@ listener, err := net.FileListener(s)
 
 ## Alternative
 
-1. Don't touch it! 
+1. Don't touch it!
 
    Yes. This RFC doesn't provide any obvious improvement (except removing the
    blocking buffer inside bpm), but I think it's valuable enough considering the
    complexity of the blocking buffer and the further progress on rpc through
    HTTP or gRPC... (But I agree that this proposal doesn't have high priority.)
 
-2. Dial abstract unix socket directly (rather than passing fd). 
+2. Dial abstract unix socket directly (rather than passing fd).
 
    Unfortunately, the abstract unix socket is binded with the network namespace,
    and the named unix socket (with a path) is binded with the mnt namespace.
@@ -115,7 +115,7 @@ listener, err := net.FileListener(s)
    clean) the file, while the abstract unix socket is automatically cleaned
    after all fds are closed.
 
-3. Passing anonymous pipe, and use the pipe to communicate. 
+3. Passing anonymous pipe, and use the pipe to communicate.
 
    The greatest advantage of using unix socket rather than anonymous pipe (with
    `pipe` syscall) is that the unix socket is full-duplex, and nearly all
