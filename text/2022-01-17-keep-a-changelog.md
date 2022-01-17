@@ -130,8 +130,8 @@ We would create a file called `CHANGELOG.md` in `master` branch, which content:
 
 ### Added
 
-- some #(pr-number)
-- entries #(pr-number) #(pr-number)
+- some [#(pr-number)](https://link)
+- entries [#(pr-number)](https://link) [#(pr-number)](https://link)
 - (I would collect items from commits in master branch)
 
 ### Changed
@@ -159,8 +159,8 @@ We would create a file called `CHANGELOG.md` in `master` branch, which content:
 
 ### Changed
 
-- some #(pr-number)
-- entries #(pr-number) #(pr-number)
+- some [#(pr-number)](https://link)
+- entries [#(pr-number)](https://link) [#(pr-number)](https://link)
 - (I would collect items from existing release notes)
 
 ### Fixed
