@@ -59,35 +59,37 @@ with "Nothing", and trim empty entries when releasing a new version.
 - As a contributor, when opening a new PR, if you think this PR should be
   considered in the changelog/release notes, please create a new item in the
   changelog.
-- As a reviewer, if you think a PR without updating changelog is enough important
-  for taking one, please ask the author of the PR to create one.
-- As a contributor, if you find some a change is enough important for taking a changelog,
-  but it doesn't, please open a new PR to update the changelog.
+- As a reviewer, if you think a PR without updating changelog is enough
+  important for taking one, please ask the author of the PR to create one.
+- As a contributor, if you find some a change is enough important for taking a
+  changelog, but it doesn't, please open a new PR to update the changelog.
 - As a reviewer/committer/maintainer, when you releasing a new version, sync the
   changelog with the released version.
 
 ### CHANGELOG.md in release-* branches
 
-We should maintain a changelog for each active `release-*` branches, for now, they
-are `release-2.0` and `release-2.1`. I would create a new file `CHANGELOG.md` in
-each branch with the existing release notes. `CHANGELOG.md` should also contains
-an `Unreleased` section for next patch/bugfix release.
+We should maintain a changelog for each active `release-*` branches, for now,
+they are `release-2.0` and `release-2.1`. I would create a new file
+`CHANGELOG.md` in each branch with the existing release notes. `CHANGELOG.md`
+should also contains an `Unreleased` section for next patch/bugfix release.
 
-When we cherry-pick a PR into `release-*` branch, if the original PR already have
-items in `Unreleased` section, it could be also cherry-picked into here.
+When we cherry-pick a PR into `release-*` branch, if the original PR already
+have items in `Unreleased` section, it could be also cherry-picked into here.
 
 #### When releasing major, minor, or bugfix/patch version
 
-The detailed step of creating a new release should be updated in release guide `RELEASE.md`.
-We should manually change the `Unreleased` section to `[x.y.z] - YYYY-MM-DD` in
-the `release-*` branch, and update `CHANGELOG.md` in `master` branch manually.
+The detailed step of creating a new release should be updated in release guide
+`RELEASE.md`. We should manually change the `Unreleased` section to `[x.y.z] -
+YYYY-MM-DD` in the `release-*` branch, and update `CHANGELOG.md` in `master`
+branch manually.
 
-So `CHANGELOG.md` in `release-*` only contains sections for minor and bugfix/patch
-releases, and `CHANGELOG.md` in `master` contains sections for all the releases.
+So `CHANGELOG.md` in `release-*` only contains sections for minor and
+bugfix/patch releases, and `CHANGELOG.md` in `master` contains sections for all
+the releases.
 
-As one principal is "The latest version comes first", and with semantic versioning's
-comparing rule, `2.1.2 > 2.0.6`. So sections in `CHANGELOG.md` in `master` should be
-like
+As one principal is "The latest version comes first", and with semantic
+versioning's comparing rule, `2.1.2 > 2.0.6`. So sections in `CHANGELOG.md` in
+`master` should be like
 
 ```markdown
 
