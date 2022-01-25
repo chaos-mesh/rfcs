@@ -83,7 +83,7 @@ To generate forms, we have think about these things before we write the code:
 - Construct the interface of a form field.
 - How to handle dependencies between fields?
 - How to find shared fields?
-- How to use the generated schemas to construct the interface?
+- Something special.
 
 For the first item, a frontend form field component should normally contains properties
 at least:
@@ -439,7 +439,7 @@ addressed, like:
 - ~~Some useless markers remain in the `helperText`.~~
 - ~~If an action only uses shared fields, the spread operator will be excess.~~
 - Output components directly? (enhancement)
-- $ref siblings aren't supported in OpenAPI v2
+- ~~$ref siblings aren't supported in OpenAPI v2~~
 
   For example:
 
