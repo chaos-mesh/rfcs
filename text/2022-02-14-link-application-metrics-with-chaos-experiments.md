@@ -36,11 +36,135 @@ as the minimum unit to display the metrics. Grafana is the widely used in
 monitoring stack, and it's a powerful design platform to make application's
 metrics looks better.
 
+And there are also other tools/platforms like Grafana, we would talk later in
+[Alternatives](#alternatives).
+
+This proposal would using Grafana Panel as the implementation, but it would keep
+the design for other platforms.
+
 The basic outcome features are:
 
 - import Grafana Panel, display it in Chaos Dashboard
 - link Grafana Panel with Chaos Experiment/Schedule/Workflow
+- enhancement ths display for metrics with chaos experiment events
 - share/reuse Grafana Panel with any user in Chaos Dashboard
+
+### Basic Concepts
+
+#### Panel
+
+Panel is the basic unit to display, **it always shown as a line chart on UI**.
+Panel could be created with outside Grafana Panel, and it should be persisted
+into the storage of Chaos Dashboard. Panel could be shared with any user, any
+chaos experiment/schedule/workflow.
+
+Panel could be linked with a chaos experiment/schedule/workflow, the relation of
+linking should be persisted.
+
+A Panel must contain some required information about its "raw panel" (the origin
+Grafana Panel), which requires:
+
+- Identify the Grafana Panel
+  - Which Grafana "backend" to use
+  - Dashboard ID of Grafana Dashboard which origin Grafana Panel belongs to
+  - Panel ID in Grafana Dashboard
+- Variables when drawing the chart
+  - Which Datasource to use
+  - Related Variables for templating "Expressions" (for querying time-series
+    data) in origin Grafana Panel
+
+Once a Panel is created, it should contains anything required to draw the chart.
+and it could be drawn on frontend immediately.
+
+> Features like `variable` and `templating expr` in Grafana is not considered in
+> short term, once the panel is created, it is "static", the charts drawn with
+> its certain parameters would not be changed (expected time range).
+
+A Panel should also contain several additional fields(for easy-to-use purposes):
+
+- Name: custom name of the panel
+- Description: description of the panel
+- Labels: panel could be labeled with many labels, it's powerful to filter the
+  panel
+
+#### Annotations
+
+Annotations are markers on line chart, it could be "instant" or "durable". It
+stands for chaos experiments, events and health check(in the future).
+
+The data of annotations would not be persisted into the storage of Chaos
+Dashboard.
+
+### Available Behaviors for Users
+
+Users could perform following behaviors:
+
+#### Use to a Grafana as "backend"
+
+User could create a Grafana backend with ths host of grafana instance and API
+Keys. As Chaos Dashboard would not modify dashboard in Grafana, so only `Viewer`
+role is enough.
+
+#### Import a Grafana Panel
+
+After the Grafana backend is created, user could import any panel from any
+Grafana dashboard.
+
+From the `share` feature of panel, user would get an url like
+`http://localhost:13000/d/7JdIeTn7z/telegraf-flux?orgId=1&viewPanel=65081`,
+Chaos Dashboard could parse the enough information to identify a Panel:
+
+- Dashboard ID
+- PanelID
+
+Then Chaos Dashboard would ask user to choose which datasource should use, and
+filling the variables which required for expression templating.
+
+At latest, user would be asked to fill the metadata of the imported panel, like
+name, description and labels.
+
+#### View Panels with Chaos Experiment
+
+For any existed chaos experiment, there should be another tab page to access the
+linked panel for current chaos experiment. The "list view" of panels should also
+display preview the data of the linked panel. And user could inspect one of
+panel in more detailed view. Annotation should be displayed on both "list view"
+and "inspect view".
+
+#### Link/Unlink Panels with Chaos Experiment
+
+User could link and unlink another panel at the "list view".
+
+#### Edit Panel
+
+All the fields of the panel should be editable:
+
+- Which Grafana backend to use
+- Dashboard ID
+- Panel ID
+- Name
+- Description
+- Labels
+
+#### Duplicate a Panel
+
+User could duplicate a panel from a existed panel. All the fields of the origin
+panel would be copied to the new panel.
+
+> The feature of duplicate panel is helpful to create series of panels with same
+> Grafana Panel with different variables
+
+#### Remove a Panel
+
+User could remove the panel imported from Grafana. When the panel is removed, it
+would also be removed from the linked chaos experiment.
+
+### About Authorization and Security
+
+Importing panel from Grafana requires a Grafana API Key with role `Viewer`.
+
+Chaos Mesh does not contains any user management system, so all teh Grafana
+backend and imported panels are simply shared with all users.
 
 ## Drawbacks
 
@@ -62,14 +186,27 @@ library.
   choosing them?
 - What is the impact of not doing this? -->
 
-- Import metrics data from datasource, then draw charts by ourself. (The problem
-  of "design".)
-- Choose other Grafana alternative integration, like Datadog, Elastic stack, New Relic or other.
+- Import metrics data from datasource directly instead of proxy by Grafana, then
+  draw charts by ourself. The most important problem is that we also provide the
+  feature about "exploring the query" and "design panels and dashboards" like
+  Grafana, for user to tuning their charts.
+- Choose other Grafana alternative integration, like Datadog, Elastic stack, New
+  Relic or other. I think we would import panel from more platform other than
+  Grafana, especially if we want to connect with cloud provider and other Cloud
+  Monitoring Services. But for now, using Grafana just makes more sense.
 
 ## Unresolved questions
 
 <!-- What parts of the design are still to be determined? -->
 
-- How to integrate Kubernetes RBAC Authorization with Grafana Credentials?
-- How to resolve variables (or templating) in the Grafana Dashboard?
-- How to automatic generate $_interval and $__rate_interval with promql `rate`
+- How to integrate Kubernetes RBAC Authorization with Grafana Credentials? As
+  the above design said, all the grafana panel and grafana backend would be
+  shared with all users. But we could start to think how do we design the user
+  management system as more and more resources only belongs to Chaos Dashboard
+  appears.
+- How to automatic generate $_interval and $__rate_interval with promql `rate`?
+  This parameter would automatically generated with grafana, related codes is
+  implemented in frontend. I am not suore porting them to golang, or just let
+  user to set a static value.
+- Feature request about the templating/preset of chaos
+  experiment/schedule/workflow, contains the relation/link with panels.
