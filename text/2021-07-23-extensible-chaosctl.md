@@ -343,20 +343,18 @@ return results, nil
 The most challenging feature of this RFC is the common query, which allow us to
 query or delete any resources by special path.
 
-##### Usage
-
-- identify resources
+##### identify resources
 
 We can identify target resources by path. For example, the path
 `/networkchaos:<name>/podio:<pod-name>` will identify the podnetworkchaos with
 `id=<pod-name>` owned by networkchaos with `id=<name>`. You can also use `@all`
 subfix like `/networkchaos@all/podio@all` to identify all resources.
 
-- `query`
+##### Subcommand `query`
 
 We provide `query` subcommand, you can query any resources by their path.
 
-- `delete`
+##### Subcommand `delete`
 
 We will provide `delete` subcommand, witch will delete identified resources.
 
