@@ -46,8 +46,8 @@ To resolve these problems, we need structural APIs.
 
 Nested resources, also called sub-resources, may accomplish our goals. For
 example, if we register the struture of `networkchaos` resources, its
-sub-resources like `iptables` and `ipset` will be registerd automatically. We can
-access the networkchaos resources by path `/networkchaos` and access its
+sub-resources like `iptables` and `ipset` will be registerd automatically. We
+can access the networkchaos resources by path `/networkchaos` and access its
 sub-resources by path `/networkchaos/iptables` or `/networkchaos/ipset`.
 
 ```go
@@ -70,8 +70,8 @@ case, we can easy fetch iptables resources only by query `{ networkchaos
 not convenient to edit in cli, we need translation between resource paths and
 GraphQL queries.
 
-For example, we can translate resource path `/networkchaos/iptables` to query
-`{ networkchaos { iptables } }`.
+For example, we can translate resource path `/networkchaos/iptables` to query `{
+networkchaos { iptables } }`.
 
 ### API Server
 
@@ -97,7 +97,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -114,13 +114,13 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     status: PodStatus!
 
     # custom sub-resources
-    logs: String! 			  @goField(forceResolver: true)
-    daemon: Pod 			    @goField(forceResolver: true)
+    logs: String!         @goField(forceResolver: true)
+    daemon: Pod           @goField(forceResolver: true)
     processes: [Process!] @goField(forceResolver: true)
     mounts: [String!]     @goField(forceResolver: true)
-    ipset: String! 			  @goField(forceResolver: true)
-    tcQdisc: String! 		  @goField(forceResolver: true)
-    iptables: String!		  @goField(forceResolver: true)
+    ipset: String!        @goField(forceResolver: true)
+    tcQdisc: String!      @goField(forceResolver: true)
+    iptables: String!     @goField(forceResolver: true)
 }
 ```
 
@@ -131,16 +131,16 @@ There is an example to resolve the `daemon`:
 
 ```go
 func (r *podResolver) Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error) {
-	var list v1.PodList
-	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(model.ComponentDaemon))); err != nil {
-		return nil, err
-	}
-	for _, daemon := range list.Items {
-		if obj.Spec.NodeName == daemon.Spec.NodeName {
-			return &daemon, nil
-		}
-	}
-	return nil, fmt.Errorf("daemon of pod(%s/%s) not found", obj.Namespace, obj.Name)
+  var list v1.PodList
+  if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(model.ComponentDaemon))); err != nil {
+    return nil, err
+  }
+  for _, daemon := range list.Items {
+    if obj.Spec.NodeName == daemon.Spec.NodeName {
+      return &daemon, nil
+    }
+  }
+  return nil, fmt.Errorf("daemon of pod(%s/%s) not found", obj.Namespace, obj.Name)
 }
 ```
 
@@ -158,7 +158,7 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -182,13 +182,14 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
 
 > There may be some virtual resources like `PodStressChaos`, you cannot find it
 > in Chaos Mesh. Schemas of them do not contains metadata, spec or status:
+>
 > ```graphql
 > type PodStressChaos {
 >     stressChaos: [StressChaos!]
-> 
+>
 >     pod: Pod!
->     cgroups: Cgroups!	              @goField(forceResolver: true)
->     processStress: [ProcessStress!]	@goField(forceResolver: true)
+>     cgroups: Cgroups!               @goField(forceResolver: true)
+>     processStress: [ProcessStress!] @goField(forceResolver: true)
 > }
 > ```
 
@@ -204,7 +205,7 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -353,7 +354,7 @@ subfix like `/networkchaos@all/podio@all` to identify all resources.
 
 - `query`
 
-We provide `query` subcommand, you can query any resources by their path. 
+We provide `query` subcommand, you can query any resources by their path.
 
 - `delete`
 
@@ -362,9 +363,9 @@ We will provide `delete` subcommand, witch will delete identified resources.
 ##### Translation
 
 If we choose GraphQL as the API solution, we must translate paths to queries.
-The `@all` subfix will be tanslated to GraphQL fragments without any
-parameters. For example, resource paths `/networkchaos@all/iptables@all` will be
-translated to query `{ networkchaos { iptables } }`.
+The `@all` subfix will be tanslated to GraphQL fragments without any parameters.
+For example, resource paths `/networkchaos@all/iptables@all` will be translated
+to query `{ networkchaos { iptables } }`.
 
 And the cascade subpaths will be tanslate to fragments with paramenters. For
 example, resource paths `/networkchaos:<name>/iptables:<podName>` will be
