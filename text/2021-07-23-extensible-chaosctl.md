@@ -180,7 +180,7 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
 }
 ```
 
-> There may be some virtual resources like `PodStressChaos`, you cannot find it
+> There may be some virtual resources like `PodStressChaos`, you cannot find them
 > in Chaos Mesh. Schemas of them do not contains metadata, spec or status:
 >
 > ```graphql
