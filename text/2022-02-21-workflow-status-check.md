@@ -150,8 +150,7 @@ status:
   conditions:
     - type: Abort # ProbeSuccess/Accomplished/DeadlineExceed/Abort
       status: "False"
-      lastProbeTime: null
-      lastTransitionTime: 2018-01-01T00:00:00Z
+      reason: "Unknown"
   records:
     - probeTime: 2018-01-01T00:00:00Z
       outcome: Success # Success/Failure
@@ -173,8 +172,30 @@ There are two ways to abort `Workflow`:
 
 - Saving the history of `StatusCheck` in the `status` of `StatusCheck`
 
+   Since an object in Kubernetes cannot exceed `1M`, we have to consider the
+   extreme case of a huge amount of `StatusCheck` history, so we added a
+   `HistoryLimit` field to limit the number of times it can be saved.
+
 ## Alternatives
 
-StatusCheck in experiment/schedule？
+- `StatusCheck` in `Experiment` or `Schedule`?
+
+   At the moment it seems to be an appropriate choice to put `StatusCheck` in
+   Workflow. We don't want to inflate `Experiment` or `Schedule` functionality
+   too much, so if there are scenarios that require `StatusCheck`,
+   then it is recommended to use `Workflow`.
+- `StatusCheck` with other types?
+
+   For example, to get data from Prometheus metrics, or to execute some
+   commands.
+
+   If you want to get data from Prometheus metrics, it is more efficient to
+   determine if grafana triggers an alarm through HTTP requests (the data from
+   Prometheus needs to be calculated by promQL, while grafana alarms are
+   configured in advance, which seems easier to use)
+
+   If the HTTP StatusCheck does not meet your needs, feel free to make any
+   suggestions (BTW, it is better to explain your usage scenarios,
+   so that we can better help you solve the problem)
 
 ## Unresolved questions
