@@ -141,11 +141,12 @@ spec:
   http:
     url: http://1.1.1.1:8080
     method: GET
+    body: ""
     headers:
     - name: a
       value: b
-    result:
-      code: 200
+    criteria:
+      responseCode: "200-209"
 status:
   conditions:
     - type: Abort # ProbeSuccess/Accomplished/DeadlineExceed/Abort
