@@ -99,7 +99,7 @@ Dashboard.
 
 Users could perform following behaviors:
 
-#### Use to a Grafana as "backend"
+#### Use Grafana as "backend"
 
 User could create a Grafana backend with ths host of grafana instance and API
 Keys. As Chaos Dashboard would not modify dashboard in Grafana, so only `Viewer`
