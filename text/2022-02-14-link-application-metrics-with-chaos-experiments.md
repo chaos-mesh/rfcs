@@ -163,7 +163,7 @@ would also be removed from the linked chaos experiment.
 
 Importing panel from Grafana requires a Grafana API Key with role `Viewer`.
 
-Chaos Mesh does not contains any user management system, so all teh Grafana
+Chaos Mesh does not contains any user management system, so all the Grafana
 backend and imported panels are simply shared with all users.
 
 ## Drawbacks
@@ -174,7 +174,7 @@ We already have a grafana plugin as mark annotations on grafana dashboard. There
 are also feature overlapping between that grafana plugin and this new feature.
 It might take more effort to keep behaviors consistent.
 
-Integrating Grafana into out components seems not really simple, most of
+Integrating Grafana into our components seems not really simple, most of
 powerful features of Grafana, like variables and templating and drawing the
 charts, are implemented in frontend. And Grafana did not well export them as a
 library.
@@ -206,7 +206,7 @@ library.
   appears.
 - How to automatic generate $_interval and $__rate_interval with promql `rate`?
   This parameter would automatically generated with grafana, related codes is
-  implemented in frontend. I am not suore porting them to golang, or just let
+  implemented in frontend. I am not sure porting them to golang, or just let
   user to set a static value.
 - Feature request about the templating/preset of chaos
   experiment/schedule/workflow, contains the relation/link with panels.
