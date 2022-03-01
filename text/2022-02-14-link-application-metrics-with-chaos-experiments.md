@@ -159,6 +159,20 @@ panel would be copied to the new panel.
 User could remove the panel imported from Grafana. When the panel is removed, it
 would also be removed from the linked chaos experiment.
 
+### Provision Grafana Panel then creating chaos experiment
+
+As so far, user could only link Grafana Panel to already existing chaos
+experiments. Here is a way to create the link of Grafana Panel to a new chaos
+experiment as the chaos experiment is created.
+
+We would introduce a new annotation: `metrics.chaos-mesh.org/link-panel`, the
+value of this annotation should be an array of names of Grafana Panels as JSON
+string. Once one chaos experiment holds this annotation, links between
+corresponding Grafana Panels and this chaos experiment would be created.
+
+The behavior of this annotation is "appending only", it means if user remove the
+annotation of the chaos experiment, the links would still eixst.
+
 ### About Authorization and Security
 
 Importing panel from Grafana requires a Grafana API Key with role `Viewer`.
@@ -194,6 +208,29 @@ library.
   Relic or other. I think we would import panel from more platform other than
   Grafana, especially if we want to connect with cloud provider and other Cloud
   Monitoring Services. But for now, using Grafana just makes more sense.
+
+### Alternative: use ConfigMap instead of database
+
+From inspired of "Status Check Template", the resource of "Grafana Panel" could
+also be stored as ConfigMaps.
+
+There are some Pros and Cons.
+
+Pros:
+
+- It would prevent data loss when the Pod chaos-dashboard is deleted/recreated.
+
+Cons:
+
+- It would ues annotations on chaos experiment CR to present the link between
+  chaos experiment and Grafana Panels. Like using "multi-valued" filed in a
+  database schema.
+  - When delete the Grafana Panel, it's expensive to update the related chaos
+    experiment. The way to bypassing it is properly resolving the link to an
+    not-existed Grafana Panel.
+  - It's expensive to list all the chaos experiments which link to certain
+    Grafana Panel.
+- The label of Grafana Panel might be also another "multi-valued" annotation.
 
 ## Unresolved questions
 
