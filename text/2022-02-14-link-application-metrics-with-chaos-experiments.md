@@ -159,6 +159,25 @@ panel would be copied to the new panel.
 User could remove the panel imported from Grafana. When the panel is removed, it
 would also be removed from the linked chaos experiment.
 
+### About Implementation
+
+The implementation of this feature is based on the following design:
+
+- using RDBMS (sqlite/mysql) and ORM (gorm) to store the data
+- all the codes is written in chaos-dashboard
+
+Entities and Relations are listed below:
+
+- Entity:
+  - Panel
+  - Label
+- Relation:
+  - Mutli-Multi Relation between Panel and Chaos Experiment
+  - Multi-Multi Relation between Panel and Label
+
+We could also use another way to implement this feature without RDBMS, would
+talk in [Alternatives](#alternative-use-configmap-instead-of-database).
+
 ### Provision Grafana Panel then creating chaos experiment
 
 As so far, user could only link Grafana Panel to already existing chaos
