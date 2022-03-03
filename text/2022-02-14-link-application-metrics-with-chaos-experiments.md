@@ -163,20 +163,27 @@ would also be removed from the linked chaos experiment.
 
 The implementation of this feature is based on the following design:
 
-- using RDBMS (sqlite/mysql) and ORM (gorm) to store the data
 - all the codes is written in chaos-dashboard
+- using RDBMS (sqlite/mysql) and ORM (gorm) to store the data
+- the annotations of panel are generated from data in kube-apiserver, instead of
+  RDBMS
 
 Entities and Relations are listed below:
 
 - Entity:
   - Panel
   - Label
+  - Chaos Experiment(which would not exist as a table)
 - Relation:
-  - Mutli-Multi Relation between Panel and Chaos Experiment
-  - Multi-Multi Relation between Panel and Label
+  - Many-to-Many Relation between Panel and Chaos Experiment
+  - Many-to-Many Relation between Panel and Label
 
 We could also use another way to implement this feature without RDBMS, would
 talk in [Alternatives](#alternative-use-configmap-instead-of-database).
+
+Because "Chaos Experiment" is not stored in RDBMS, we should setup another
+hook(kubernetes reconciler listens on Delete event) or scheduled job to clean
+the orphan relations.
 
 ### Provision Grafana Panel then creating chaos experiment
 
