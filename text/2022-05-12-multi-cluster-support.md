@@ -31,7 +31,7 @@ spec:
 status:
  currentVersion: "v2.1.0"
  conditions:
- - type: Running
+ - type: Installed
    status: True
  - type: Ready
    status: True
@@ -266,3 +266,19 @@ chaos-controller-manager could work in three different modes:
 
 (maybe these modes can be described through turning on/off some controllers /
 webhooks)
+
+## Dashboard
+
+As the plan shown above, we don't need too much modification on dashboard. The
+cluster installation status should be represented in `RemoteCluster`, and the
+execution status of a standalone chaos should be recorded in the `.Status` of
+every chaos. The `Workflow` and `Schedule` doesn't exist in the child cluster.
+
+Given these design, all information about the execution of current chaos can be
+read in the current (parent) cluster, and showed in the dashboard like the
+normal chaos.
+
+The only modification, is to use the events recorded in the chaos, rather than
+the events in the kubernetes cluster. As the events in the chaos status and the
+events in Kubernetes cluster are totally redundant now, we should peek one of
+them.
