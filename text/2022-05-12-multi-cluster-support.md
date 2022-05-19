@@ -61,7 +61,7 @@ User creates RemoteCluster -> RemoteCluster controller Reconcile
 
 User removes the RemoteCluster -> RemoteCluster controller Reconcile
 
-Pods in the target cluster/namespace changed -> RemoteCluster controller Reconcile
+Pods in the target cluster/namespace changed -> RemoteCluster controller Reconcile (resources will be mapped to the `RemoteCluster`)
 
 RemoteCluster controller Reconcile
 -> If the resource is being deleted
@@ -163,7 +163,7 @@ User creates chaos -> if this chaos contain a `remoteCluster` field, the remote 
 
 User delete chaos -> if this chaos contain a `remoteCluster` field, the remote chaos controller reconcile
 
-Chaos in child cluster changed -> the remote chaos controller reconcile
+Chaos in child cluster changed -> the remote chaos controller reconcile (resources will be mapped to the chaos in parent cluster)
 
 Controller Reconcile -> If the Target Cluster is not ready, do nothing and return
    -> If the chaos is being deleted
