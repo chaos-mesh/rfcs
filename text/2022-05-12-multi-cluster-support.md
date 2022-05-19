@@ -149,7 +149,8 @@ notification… We should also provide a way to force remove both parent and chi
    another controller in the target cluster, we only need an available
    kubeconfig, which is much simpler than the network configuration.
 
-2. Why is it an extra field? Would a standalone resource / annotation / … be better?
+2. Why is the `remoteCluster` an extra field? Would a standalone resource /
+   annotation / … be better?
 
    I can’t say which one is better. It’s a blind choice. I don’t want to create
    a new embedded standalone resource because the existing two embedded
