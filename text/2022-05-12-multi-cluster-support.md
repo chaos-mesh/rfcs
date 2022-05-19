@@ -41,8 +41,9 @@ The `Spec` defines the cluster which we want to install the chaos mesh, and the
 version of chaos mesh. It will install the same version of Chaos Mesh as the
 controller’s, which means if the version of controller is v2.2.0, it will
 install or upgrade the chaos mesh to v2.2.0 in the target cluster. The
-`configOverride` allows to override the default configurations. The full
-configuration is a combination of default configuration and the override. We
+`configOverride` allows to override the global configurations. The full
+configuration is a combination of the default configuration, the global
+configuration (provided through a constant configmap) and the override. We
 should provide an eliminated default configuration with the controller, as there
 are too many things not needed in the child chaos mesh.
 
