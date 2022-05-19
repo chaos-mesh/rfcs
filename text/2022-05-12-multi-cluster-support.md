@@ -53,6 +53,29 @@ release has been installed in the target cluster and namespace. The condition
 `Ready` is True iff all pods are ready. The `currentVersion` in the status gives
 us a chance to automatically migrate the configuration.
 
+The total workflow can be described in the following graph:
+
+```
+User creates RemoteCluster -> RemoteCluster controller Reconcile
+
+User removes the RemoteCluster -> RemoteCluster controller Reconcile
+
+Pods in the target cluster/namespace changed -> RemoteCluster controller Reconcile
+
+RemoteCluster controller Reconcile
+-> If the resource is being deleted
+   -> Helm list the installed release
+   -> If the chaos-mesh chart is not installed, and there is no chaos using this cluster
+      remove the finalizer
+   -> Apply the chaos and return
+-> If the finalizer doesn't exist, add a finalizer
+-> Helm list the installed release/chart
+   -> If the chaos-mesh chart is not installed, and the `RemoteCluster` itself is not being 
+      deleted, install the Chaos Mesh through helm and list the helm release again
+   -> If the chaos-mesh chart is installed, `Installed` conditions turn to true, else, turn to false
+-> If all pods of target Chaos Mesh are running, `Ready` conditions turn to true, else, turn to false
+```
+
 ### Q&A
 
 1. Why do we need to manage the installation of Chaos Mesh?
@@ -131,6 +154,26 @@ As there is nothing like `ownerReference` across the clusters, we will need to
 handle the unexpected situation, e.g. the parent is deleted without
 notification… We should also provide a way to force remove both parent and child
 (maybe propagating the annotation is enough).
+
+The total workflow can be described in the following graph:
+
+```
+User creates chaos -> if this chaos contain a `remoteCluster` field, the remote chaos controller reconcile
+
+User delete chaos -> if this chaos contain a `remoteCluster` field, the remote chaos controller reconcile
+
+Chaos in child cluster changed -> the remote chaos controller reconcile
+
+Controller Reconcile -> If the Target Cluster is not ready, do nothing and return
+   -> If the chaos is being deleted
+      -> If the chaos in the child cluster doesn't exist, remove the finalizer
+      -> Apply and return
+   -> If the finalizer doesn't exist, add a finalizer
+   -> Get the chaos in child cluster
+      -> If the chaos in the child cluster doesn't exist, create the chaos in the child cluster
+      -> If the chaos in the child cluster exists, read the `Status` of the chaos in the child cluster
+         and update the `Status` of the chaos in the parent cluster
+```
 
 ### Q&A
 
