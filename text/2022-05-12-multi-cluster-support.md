@@ -108,7 +108,7 @@ RemoteCluster controller Reconcile
 
    In the chaos-controller-manager.
 
-5. What will be installed?
+5. What will it install?
 
    A normal Chaos Mesh, with some controllers (like dashboard, workflow,
    schedule) disabled.
