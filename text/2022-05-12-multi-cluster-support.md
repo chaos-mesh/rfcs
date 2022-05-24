@@ -40,12 +40,13 @@ status:
 The `Spec` defines the cluster which we want to install the chaos mesh, and the
 version of chaos mesh. It will install the same version of Chaos Mesh as the
 controller’s, which means if the version of controller is v2.2.0, it will
-install or upgrade the chaos mesh to v2.2.0 in the target cluster. The
-`configOverride` allows to override the global configurations. The full
-configuration is a combination of the default configuration, the global
-configuration (provided through a constant configmap) and the override. We
-should provide an eliminated default configuration with the controller, as there
-are too many things not needed in the child chaos mesh.
+install or upgrade the chaos mesh to v2.2.0 in the target cluster. It will only
+support the same minor version (e.g. parent cluster "v2.2.0" could control
+remote cluster "v2.2.1"). The `configOverride` allows to override the global
+configurations. The full configuration is a combination of the default
+configuration, the global configuration (provided through a constant configmap)
+and the override. We should provide an eliminated default configuration with the
+controller, as there are too many things not needed in the remote chaos mesh.
 
 The `Status` shows the current status of the target cluster. All of this field
 can be read from the target cluster through the helm package or read the pods’
@@ -74,6 +75,7 @@ RemoteCluster controller Reconcile
    -> If the chaos-mesh chart is not installed, and the `RemoteCluster` itself is not being 
       deleted, install the Chaos Mesh through helm and list the helm release again
    -> If the chaos-mesh chart is installed, `Installed` conditions turn to true, else, turn to false
+   -> If the chaos-mesh chart is installed, but the config is different from the current merged config, run helm upgrade
 -> If all pods of target Chaos Mesh are running, `Ready` conditions turn to true, else, turn to false
 ```
 
@@ -141,11 +143,11 @@ spec:
  
 For a chaos whose remoteCluster is not nil, the controller will synchronize this
 resource with the target namespace in the target cluster. “synchronize” is
-executed in two-ways: distribute the spec from the parent to child, and sync the
-status from the child to parent. As we don’t support modifying the spec yet,
-half of the “synchronize” is executed only once. The child chaos resource will
-be created with some annotations to help the controller find the parent (in
-parent cluster).
+executed in two-ways: distribute the spec from the parent to remote, and sync
+the status from the remote cluster to parent. As we don’t support modifying the
+spec yet, half of the “synchronize” is executed only once. The remote chaos
+resource will be created with some annotations to help the controller find the
+parent (in parent cluster).
 
 For implementation, the chaos mesh will set up multiple “Managers”, one for each
 cluster. These managers will set up controllers to synchronize the things.
@@ -153,8 +155,8 @@ cluster. These managers will set up controllers to synchronize the things.
 The creation, deletion is straightforward. Another thing to consider is the GC.
 As there is nothing like `ownerReference` across the clusters, we will need to
 handle the unexpected situation, e.g. the parent is deleted without
-notification… We should also provide a way to force remove both parent and child
-(maybe propagating the annotation is enough).
+notification… We should also provide a way to force remove both parent and
+remote (maybe propagating the annotation is enough).
 
 The total workflow can be described in the following graph:
 
@@ -163,16 +165,16 @@ User creates chaos -> if this chaos contain a `remoteCluster` field, the remote 
 
 User delete chaos -> if this chaos contain a `remoteCluster` field, the remote chaos controller reconcile
 
-Chaos in child cluster changed -> the remote chaos controller reconcile (resources will be mapped to the chaos in parent cluster)
+Chaos in remote cluster changed -> the remote chaos controller reconcile (resources will be mapped to the chaos in parent cluster)
 
 Controller Reconcile -> If the Target Cluster is not ready, do nothing and return
    -> If the chaos is being deleted
-      -> If the chaos in the child cluster doesn't exist, remove the finalizer
+      -> If the chaos in the remote cluster doesn't exist, remove the finalizer
       -> Apply and return
    -> If the finalizer doesn't exist, add a finalizer
-   -> Get the chaos in child cluster
-      -> If the chaos in the child cluster doesn't exist, create the chaos in the child cluster
-      -> If the chaos in the child cluster exists, read the `Status` of the chaos in the child cluster
+   -> Get the chaos in remote cluster
+      -> If the chaos in the remote cluster doesn't exist, create the chaos in the remote cluster
+      -> If the chaos in the remote cluster exists, read the `Status` of the chaos in the remote cluster
          and update the `Status` of the chaos in the parent cluster
 ```
 
@@ -203,12 +205,12 @@ Controller Reconcile -> If the Target Cluster is not ready, do nothing and retur
    official API, but annotations do not (or maybe we could start from
    annotations? I’m not sure).
 
-3. Can one chaos inject fault into different clusters?
+3. Can one chaos inject fault across different clusters?
 
    Obviously, no. I don’t think we can provide a general way to implement this
    in the near future.
 
-4. Where will the webhook run?
+4. (For a chaos with `remoteCluster`) Where will the webhook run?
 
    In the parent chaos mesh. Because we will not create chaos in the webhook
    (but in the reconcile), the validation should be done in the parent’s
@@ -239,6 +241,11 @@ userMap:
   cluster: *
   name: admin
 ```
+
+The webhook should also create a `SubjectAccessReview` in the remote cluster to
+check whether the remote user is privileged enough to create the chaos. This
+behavior makes it possible for the user to know the authorization error while
+creating the chaos, but not after creation.
 
 We should also provide an option to stop the webhook (in helm), as it will truly
 bring some inconvenience to the users. If the users don’t care about
@@ -298,7 +305,7 @@ will be responsible for
 6. normal chaos injecting / recovering, as the user may want to inject to
    current management cluster
 
-In the child cluster, the chaos-controller-manager and chaos-daemon will be
+In the remote cluster, the chaos-controller-manager and chaos-daemon will be
 responsible for injecting / recovering chaos
 
 These two chaos-controller-manager could share a single binary, so the
@@ -316,7 +323,7 @@ webhooks)
 As the plan shown above, we don't need too much modification on dashboard. The
 cluster installation status should be represented in `RemoteCluster`, and the
 execution status of a standalone chaos should be recorded in the `.Status` of
-every chaos. The `Workflow` and `Schedule` doesn't exist in the child cluster.
+every chaos. The `Workflow` and `Schedule` doesn't exist in the remote cluster.
 
 Given these design, all information about the execution of current chaos can be
 read in the current (parent) cluster, and showed in the dashboard like the
