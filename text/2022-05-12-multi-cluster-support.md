@@ -23,8 +23,8 @@ spec:
  namespace: "chaos-mesh"
  kubeConfig:
    secretRef:
-     name: “cluster-xxx-kubeconfig”
-   key: xxx
+      name: “cluster-xxx-kubeconfig”
+      key: xxx
  configOverride:
    chaosDaemon:
      runtime: containerd
@@ -66,12 +66,12 @@ Pods in the target cluster/namespace changed -> RemoteCluster controller Reconci
 
 RemoteCluster controller Reconcile
 -> If the resource is being deleted
-   -> Helm list the installed release
+   -> Helm list the installed release in remote cluster
    -> If the chaos-mesh chart is not installed, and there is no chaos using this cluster
       remove the finalizer
    -> Apply the chaos and return
 -> If the finalizer doesn't exist, add a finalizer
--> Helm list the installed release/chart
+-> Helm list the installed release/chart in remote cluster
    -> If the chaos-mesh chart is not installed, and the `RemoteCluster` itself is not being 
       deleted, install the Chaos Mesh through helm and list the helm release again
    -> If the chaos-mesh chart is installed, `Installed` conditions turn to true, else, turn to false
