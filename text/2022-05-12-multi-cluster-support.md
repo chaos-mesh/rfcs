@@ -40,13 +40,13 @@ status:
 The `Spec` defines the cluster which we want to install the chaos mesh, and the
 version of chaos mesh. It will install the same version of Chaos Mesh as the
 controller’s, which means if the version of controller is v2.2.0, it will
-install or upgrade the chaos mesh to v2.2.0 in the target cluster. It will only
-support the same minor version (e.g. parent cluster "v2.2.0" could control
-remote cluster "v2.2.1"). The `configOverride` allows to override the global
-configurations. The full configuration is a combination of the default
-configuration, the global configuration (provided through a constant configmap)
-and the override. We should provide an eliminated default configuration with the
-controller, as there are too many things not needed in the remote chaos mesh.
+install the chaos mesh to v2.2.0 in the target cluster. It will only support the
+same minor version (e.g. parent cluster "v2.2.0" could control remote cluster
+"v2.2.1"). The `configOverride` allows to override the global configurations.
+The full configuration is a combination of the default configuration, the global
+configuration (provided through a constant configmap) and the override. We
+should provide an eliminated default configuration with the controller, as there
+are too many things not needed in the remote chaos mesh.
 
 The `Status` shows the current status of the target cluster. All of this field
 can be read from the target cluster through the helm package or read the pods’
@@ -114,6 +114,20 @@ RemoteCluster controller Reconcile
 
    A normal Chaos Mesh, with some controllers (like dashboard, workflow,
    schedule) disabled.
+
+6. When will the cluster be upgraded?
+
+   As discussed with @iguoyr, automatically upgrading is a dangerous behavior.
+   The controller will never upgrade the remote cluster automatically, except
+   when the user add an annotation to tell us he want to upgrade the cluster. We
+   could also provide a global configuration to always upgrade the cluster
+   automatically.
+
+   If the remote cluster version is using an outdated version, all functions
+   except upgrade and uninstalltion (like modifying the configuration) will not
+   work.
+
+   Upgrading the cluster will also `replace` the CRD.
 
 ## Inject
 
