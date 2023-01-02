@@ -1,5 +1,15 @@
 # OpenAPI to TypeScript API Client and Forms
 
+> Updated on 2022-11-03:
+>
+> After much practice, I found that using [Orval](https://orval.dev/) instead of
+> [OpenAPITools/openapi-generator](https://github.com/OpenAPITools/openapi-generator)
+> eliminates the dependency on the JRE, which solves the cons mentioned below.
+>
+> So I plan to use Orval in the future to generate the client.
+>
+> The other parts in this RFC still remain unchanged. :)
+
 ## Summary
 
 Use the OpenAPI specification to generate a TypeScript API client and forms.
