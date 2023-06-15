@@ -12,11 +12,11 @@ For example, when stopping an instance it should be possible to select by name, 
 
 Additionally, it would be useful to simulate outages by changing network ACLs in a similar way to how NetworkChaos works.
 
-Currently AWSChaos targets a single instance by InstanceID.  It does not really support selectors and `mode` such as `one`, `all` or `fixed-percent`.
-
-GCPChaos targets a single instance by `name` only.
-
-AzureChaos targets VM by `resource_group` and `name` and does have a `mode` parameter.  Behaviour of `mode` if `name` is not specified is not documented.
+| ChaosType | Selector | Notes |
+| --------- | -------- | ----- |
+| AWSChaos  | Single instance by `InstanceID`| No support for selectors |
+| GCPChaos  | Single instance by `name`| No support for selectors |
+| AzureChaos | Single instance by `resource_group` and `name`| Docs does mention a `mode` parameter, but behavious is not documented |
 
 It would be good to make these types similar, so users of chaos-mesh with multiple cloud providers can create similar experiments easily across all clouds.  However since we rely on the underlying SDK libraries from each provider, it seems sensible that we should keep close the the naming conventions used in the SDK.
 
