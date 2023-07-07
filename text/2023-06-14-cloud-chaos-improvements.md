@@ -40,7 +40,9 @@ Currently, none of these types use `Selectors` currently.  We should use the
 `RecordsController` with the `impl.Select` to lookup matching resources in the
 cloud and save these in the `records` as described
 [here](https://github.com/chaos-mesh/chaos-mesh/tree/master/controllers/common/records#readme)
+Since `filters` field is new, it is not a breaking change, so it is safe to update the existing chaos types.
 
+The initial types AWSChaos, GCPChaos and AzureChaos represent the common Instance or VirtualMachine resource types.  CloudProviders have many different resource types that we may want to target for chaos in future.  We can introduce new chaos experiment types for these, such as AWSNetworkChaos or AWSAutoscalerChaos.
 
 ## Detailed design
 
@@ -90,6 +92,13 @@ spec:
   duration: '5m'
 ```
 
+Supported filters are described in the Google Cloud Compute Engine reference.  For details see:
+https://cloud.google.com/compute/docs/reference/rest/v1/instances/list
+
+If multiple filters are provided, they will be combined with an AND expression.
+
+
+
 ## Drawbacks
 
 
@@ -107,13 +116,11 @@ spec:
 
 ## Unresolved questions
 
-- Should new chaos types be introduced for additional cloud resource types?
+- How to filter VMs list using Azure SDK.
 
-   It might be necessary to introduce new chaos types e.g. AWSNetworkChaos,
-   GCPNetworkChaos and so on.
+  Documentation isn't the best.  Also the autorest library used in chaos-mesh
+  is out of support: https://github.com/Azure/go-autorest
 
-   It might be necessary to make breaking changes to the structures, so it 
-   in this case it would be easier to introduce new types and eventually
-   deprecate the old ones.
-
-   We need to explore the solution in more detail before we can decide.
+  The following does work:  `az vm list -d --query "[?tags.env=='staging']"`
+  but I couldn't easily find how to do this in the golang SDK.  Have asked on
+  gophers slack.
